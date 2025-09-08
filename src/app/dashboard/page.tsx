@@ -17,7 +17,7 @@ import { IconButton } from '../ui';
 
 export default function Dashboard() {
   const router = useRouter();
-  const addTransactionModal = useModal();
+  const modal = useModal();
 
   // Mock data - replace with real data from your API
   const totalIncome = 12500.0;
@@ -33,7 +33,7 @@ export default function Dashboard() {
       type="button"
       key="add-transaction"
       icon={<CirclePlus size={20} />}
-      onClick={addTransactionModal.open}
+      onClick={modal.open}
       size="md"
       title="Add transaction"
     />,
@@ -89,9 +89,8 @@ export default function Dashboard() {
           <div>
             <p className="font-medium text-gray-600 text-sm">Total Balance</p>
             <p
-              className={`text-2xl font-bold ${
-                totalBalance >= 0 ? "text-green-600" : "text-red-600"
-              }`}
+              className={`text-2xl font-bold ${totalBalance >= 0 ? "text-green-600" : "text-red-600"
+                }`}
             >
               $
               {totalBalance.toLocaleString("en-US", {
@@ -114,8 +113,8 @@ export default function Dashboard() {
 
       {/* Add Transaction Modal */}
       <Modal
-        isOpen={addTransactionModal.isOpen}
-        onClose={addTransactionModal.close}
+        isOpen={modal.isOpen}
+        onClose={modal.close}
         title="Add New Transaction"
         description="Enter the details of your new transaction below."
       >

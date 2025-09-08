@@ -1,14 +1,22 @@
 import { PageLayout } from '../components';
+import { DataGrid } from '../ui';
 
+const columns = [
+  { title: 'Description', field: 'description' },
+  { title: 'Category', field: 'Category' },
+  { title: "Amount", field: "amount" }
+  // ...
+];
+
+const data = [
+  {
+    description: "hello"
+  }
+]
 export default function Transactions() {
   return (
     <PageLayout title="Transactions">
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <p className="text-gray-600">
-          Welcome to your transactions page. This is a blank page ready for your
-          transaction content.
-        </p>
-      </div>
+      <DataGrid columns={columns} data={data} />
     </PageLayout>
   );
 }

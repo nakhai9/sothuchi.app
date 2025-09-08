@@ -145,7 +145,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   );
 
   return (
-    <div className="relative bg-white p-4 border border-gray-300 rounded-lg h-[400px]">
+    <div className="relative bg-white p-4 border border-gray-300 rounded-lg h-80">
       <div className={containerClasses}>
         {isLoading && <LoadingOverlay />}
 

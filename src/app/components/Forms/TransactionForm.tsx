@@ -5,16 +5,36 @@ import {
 } from 'react';
 
 import clsx from 'clsx';
+import {
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
 
+import { useModal } from '@/hooks';
 import { getCategories } from '@/services/categoriesService';
 import { CategoryModel } from '@/types/category';
 
 import FileUploadZone from '../FileUploadZone';
 
+type TransactionForm = {
+  type: "income" | "expense",
+  amount: number;
+  date: Date;
+  description: string;
+  categoryId: number;
+}
+
 export default function TransactionForm() {
-  const [type, setType] = useState<"income" | "expense">("income");
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const { register, handleSubmit } = useForm<TransactionForm>({
+    defaultValues: {
+      type: "income",
+      amount: 0
+    },
+  })
+
+  const modal = useModal();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -32,70 +52,120 @@ export default function TransactionForm() {
     fetchCategories();
   }, []);
 
+  const onSubmit: SubmitHandler<TransactionForm> = async (data) => console.log(data)
+
   const ManualForm = (
-    <form className="flex flex-col gap-4">
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex gap-5">
         <div className="flex gap-2">
           <input
             type="radio"
-            checked={type === "income"}
-            onChange={(e) => setType("income")}
+            value="income"
+            {...register("type")}
+            id="type-income"
           />
-          <label htmlFor="" className="text-sm">
+          <label htmlFor="type-income" className="text-sm">
             Income
           </label>
         </div>
         <div className="flex gap-2">
           <input
             type="radio"
-            checked={type === "expense"}
-            onChange={(e) => setType("expense")}
+            value="expense"
+            {...register("type")}
+            id="type-expense"
           />
-          <label htmlFor="" className="text-sm">
+          <label htmlFor="type-expense" className="text-sm">
             Expense
           </label>
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="amount" className="block font-bold text-sm">
+        <label htmlFor="amount" className="block font-bold text-gray-800 text-sm">
           Amount
         </label>
         <input
-          type="text"
+          type="number"
           id="amount"
+          {...register("amount", { valueAsNumber: true })}
           className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="block font-bold text-sm">
+        <label htmlFor="description" className="block font-bold text-gray-800 text-sm">
           Description
         </label>
         <input
           type="text"
           id="description"
+          {...register("description")}
           className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="block font-bold text-sm">
+        <label htmlFor="description" className="block font-bold text-gray-800 text-sm">
           Category
         </label>
-        <select
-          name=""
-          id=""
-          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none text-sm"
-        >
-          {categories.map((cat) => (
+        <select id="categoryId"
+          {...register("categoryId", { valueAsNumber: true })} className="block px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+          {categories.length ? categories.map((cat) => (
             <option key={cat.id}>{cat.name}</option>
-          ))}
+          )) : <option key="other" value="0">Other</option>}
+
         </select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label htmlFor="date" className="block font-bold text-gray-800 text-sm">
+          Date
+        </label>
+        <input
+          type="date"
+          id="date"
+          {...register("date")}
+          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        />
+      </div>
+
+      <div className="flex justify-end gap-3">
+        <button
+          type='button'
+          onClick={modal.close}
+          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type='submit'
+          onClick={modal.close}
+          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
+        >
+          Save
+        </button>
+
       </div>
     </form>
   );
 
   const BillForm = (
-    <form>
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <FileUploadZone />
+      <div className="flex justify-end gap-3">
+        <button
+          type='button'
+          onClick={modal.close}
+          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type='submit'
+          onClick={modal.close}
+          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
+        >
+          Save
+        </button>
+
+      </div>
     </form>
   );
 

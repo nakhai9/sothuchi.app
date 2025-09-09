@@ -1,9 +1,5 @@
 // utils/httpService.ts
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-} from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 // Tạo Axios instance mặc định
 const axiosInstance: AxiosInstance = axios.create({
@@ -41,7 +37,7 @@ async function get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
 
 async function post<T>(
   url: string,
-  data?: any,
+  data?: T,
   config?: AxiosRequestConfig
 ): Promise<T> {
   const response: AxiosResponse<T> = await axiosInstance.post(
@@ -54,7 +50,7 @@ async function post<T>(
 
 async function put<T>(
   url: string,
-  data?: any,
+  data?: T,
   config?: AxiosRequestConfig
 ): Promise<T> {
   const response: AxiosResponse<T> = await axiosInstance.put(url, data, config);

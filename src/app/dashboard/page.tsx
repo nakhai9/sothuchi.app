@@ -1,19 +1,11 @@
 "use client";
-import {
-  CirclePlus,
-  ReceiptText,
-  WalletMinimal,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { CirclePlus, ReceiptText, WalletMinimal } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { useModal } from '@/hooks';
+import { useModal } from "@/hooks";
 
-import {
-  Modal,
-  PageLayout,
-  TransactionForm,
-} from '../components';
-import { IconButton } from '../ui';
+import { Modal, PageLayout, TransactionForm } from "../components";
+import { IconButton } from "../ui";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -24,8 +16,12 @@ export default function Dashboard() {
   const totalExpenses = 8750.0;
   const totalBalance = totalIncome - totalExpenses;
 
-  const handleGoToTransactionsPage = () => {
-    router.push("/transactions");
+  const handleGoToPage = (url: string) => {
+    router.push(url);
+  };
+
+  const handleOpenTransactionModal = () => {
+    modal.open();
   };
 
   const actions = [
@@ -33,7 +29,7 @@ export default function Dashboard() {
       type="button"
       key="add-transaction"
       icon={<CirclePlus size={20} />}
-      onClick={modal.open}
+      onClick={handleOpenTransactionModal}
       size="md"
       title="Add transaction"
     />,
@@ -41,13 +37,14 @@ export default function Dashboard() {
       type="button"
       key="transactions"
       icon={<ReceiptText size={20} />}
-      onClick={handleGoToTransactionsPage}
+      onClick={() => handleGoToPage("/transactions")}
       size="md"
       title="Transactions"
     />,
     <IconButton
       type="button"
       key="wallets"
+      onClick={() => handleGoToPage("/accounts")}
       icon={<WalletMinimal size={20} />}
       size="md"
       title="Wallets"
@@ -89,8 +86,9 @@ export default function Dashboard() {
           <div>
             <p className="font-medium text-gray-600 text-sm">Total Balance</p>
             <p
-              className={`text-2xl font-bold ${totalBalance >= 0 ? "text-green-600" : "text-red-600"
-                }`}
+              className={`text-2xl font-bold ${
+                totalBalance >= 0 ? "text-green-600" : "text-red-600"
+              }`}
             >
               $
               {totalBalance.toLocaleString("en-US", {
@@ -111,14 +109,13 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Add Transaction Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={modal.close}
         title="Add New Transaction"
         description="Enter the details of your new transaction below."
       >
-        <TransactionForm />
+        <TransactionForm modal={modal} />
       </Modal>
     </PageLayout>
   );

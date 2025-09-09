@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { SubmitHandler, useForm } from "react-hook-form";
 
-import { useModal } from "@/hooks";
+import { UseModalReturn } from "@/hooks/useModal";
 import { CategoryModel } from "@/models/category";
 import { SERVICES } from "@/services/service";
 
@@ -17,10 +17,13 @@ type TransactionForm = {
   description: string;
   categoryId: number;
 };
-
-export default function TransactionForm() {
+type TransactionFormProps = {
+  modal: UseModalReturn;
+};
+export default function TransactionForm({ modal }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit } = useForm<TransactionForm>({
     defaultValues: {
       type: "income",
@@ -28,10 +31,9 @@ export default function TransactionForm() {
     },
   });
 
-  const modal = useModal();
-
   useEffect(() => {
     const fetchCategories = async () => {
+      setIsLoading(true);
       try {
         const categories = await SERVICES.categoryService.getCategories();
         if (categories) {
@@ -39,6 +41,8 @@ export default function TransactionForm() {
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -149,6 +153,7 @@ export default function TransactionForm() {
         </button>
         <button
           type="submit"
+          disabled={isLoading}
           className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
         >
           Save

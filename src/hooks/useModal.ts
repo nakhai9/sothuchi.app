@@ -1,14 +1,11 @@
-import {
-  useCallback,
-  useState,
-} from 'react';
+import { useCallback, useState } from "react";
 
-interface UseModalReturn {
+export type UseModalReturn = {
   isOpen: boolean;
   open: () => void;
   close: () => void;
   toggle: () => void;
-}
+};
 
 export function useModal(initialState: boolean = false): UseModalReturn {
   const [isOpen, setIsOpen] = useState(initialState);

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { CirclePlus } from "lucide-react";
 
@@ -15,24 +15,29 @@ import { IconButton } from "../ui";
 export default function Account() {
   const modal = useModal();
   const [accounts, setAccounts] = useState<(AccountModel & BaseEntity)[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleOpenAccountModal = () => {
     modal.open();
   };
 
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const accounts = await SERVICES.accountService.getAccounts();
-        if (accounts) {
-          setAccounts(accounts);
-        }
-      } catch (error) {
-        console.log(error);
+  const fetchAccounts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const accounts = await SERVICES.accountService.getAccounts();
+      if (accounts) {
+        setAccounts(accounts);
       }
-    };
-    fetchAccounts();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   const actions = [
     <IconButton
@@ -62,7 +67,7 @@ export default function Account() {
       </div>
 
       <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
-        <AccountForm modal={modal} />
+        <AccountForm modal={modal} onSuccess={} />
       </Modal>
     </PageLayout>
   );

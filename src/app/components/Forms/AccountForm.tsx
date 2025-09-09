@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { SubmitHandler, useForm } from "react-hook-form";
 
 import { UseModalReturn } from "@/hooks/useModal";
@@ -13,12 +15,15 @@ type AccountForm = {
 
 type AccountFormProps = {
   modal: UseModalReturn;
+  onSuccess?: () => void;
 };
-export default function AccountForm({ modal }: AccountFormProps) {
+export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
   const { register, handleSubmit } = useForm<AccountForm>();
 
   const userInfo = useGlobalStore((state) => state.userInfo);
+  const [isLoading, setIsLoading] = useState(false);
   const onSubmit: SubmitHandler<AccountForm> = async (data: AccountForm) => {
+    setIsLoading(true);
     try {
       await SERVICES.accountService.create({
         ...data,
@@ -27,9 +32,11 @@ export default function AccountForm({ modal }: AccountFormProps) {
       });
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false);
+      modal?.close();
+      onSuccess?.();
     }
-
-    modal?.close();
   };
 
   return (

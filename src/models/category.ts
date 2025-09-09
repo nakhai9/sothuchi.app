@@ -1,4 +1,4 @@
-import { BaseEntity } from './common';
+import { BaseEntity } from "./base";
 
 export type CategoryModel = {
   name: string;

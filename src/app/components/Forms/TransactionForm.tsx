@@ -1,28 +1,22 @@
 "use client";
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from "react";
 
-import clsx from 'clsx';
-import {
-  SubmitHandler,
-  useForm,
-} from 'react-hook-form';
+import clsx from "clsx";
+import { SubmitHandler, useForm } from "react-hook-form";
 
-import { useModal } from '@/hooks';
-import { getCategories } from '@/services/categoriesService';
-import { CategoryModel } from '@/types/category';
+import { useModal } from "@/hooks";
+import { CategoryModel } from "@/models/category";
+import { SERVICES } from "@/services/service";
 
-import FileUploadZone from '../FileUploadZone';
+import FileUploadZone from "../FileUploadZone";
 
 type TransactionForm = {
-  type: "income" | "expense",
+  type: "income" | "expense";
   amount: number;
   date: Date;
   description: string;
   categoryId: number;
-}
+};
 
 export default function TransactionForm() {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
@@ -30,17 +24,16 @@ export default function TransactionForm() {
   const { register, handleSubmit } = useForm<TransactionForm>({
     defaultValues: {
       type: "income",
-      amount: 0
+      amount: 0,
     },
-  })
+  });
 
   const modal = useModal();
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const categories = await getCategories();
-        console.log("categories", categories);
+        const categories = await SERVICES.categoryService.getCategories();
         if (categories) {
           setCategories(categories);
         }
@@ -52,7 +45,12 @@ export default function TransactionForm() {
     fetchCategories();
   }, []);
 
-  const onSubmit: SubmitHandler<TransactionForm> = async (data) => console.log(data)
+  const onSubmit: SubmitHandler<TransactionForm> = async (
+    data: TransactionForm
+  ) => {
+    console.log(data);
+    modal.close();
+  };
 
   const ManualForm = (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
@@ -81,7 +79,10 @@ export default function TransactionForm() {
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="amount" className="block font-bold text-gray-800 text-sm">
+        <label
+          htmlFor="amount"
+          className="block font-bold text-gray-800 text-sm"
+        >
           Amount
         </label>
         <input
@@ -92,7 +93,10 @@ export default function TransactionForm() {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="block font-bold text-gray-800 text-sm">
+        <label
+          htmlFor="description"
+          className="block font-bold text-gray-800 text-sm"
+        >
           Description
         </label>
         <input
@@ -103,15 +107,24 @@ export default function TransactionForm() {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="description" className="block font-bold text-gray-800 text-sm">
+        <label
+          htmlFor="description"
+          className="block font-bold text-gray-800 text-sm"
+        >
           Category
         </label>
-        <select id="categoryId"
-          {...register("categoryId", { valueAsNumber: true })} className="block px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-          {categories.length ? categories.map((cat) => (
-            <option key={cat.id}>{cat.name}</option>
-          )) : <option key="other" value="0">Other</option>}
-
+        <select
+          id="categoryId"
+          {...register("categoryId", { valueAsNumber: true })}
+          className="block px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        >
+          {categories.length ? (
+            categories.map((cat) => <option key={cat.id}>{cat.name}</option>)
+          ) : (
+            <option key="other" value="0">
+              Other
+            </option>
+          )}
         </select>
       </div>
       <div className="flex flex-col gap-1">
@@ -128,20 +141,18 @@ export default function TransactionForm() {
 
       <div className="flex justify-end gap-3">
         <button
-          type='button'
+          type="button"
           onClick={modal.close}
           className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
         >
           Cancel
         </button>
         <button
-          type='submit'
-          onClick={modal.close}
+          type="submit"
           className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
         >
           Save
         </button>
-
       </div>
     </form>
   );
@@ -151,20 +162,18 @@ export default function TransactionForm() {
       <FileUploadZone />
       <div className="flex justify-end gap-3">
         <button
-          type='button'
+          type="button"
           onClick={modal.close}
           className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
         >
           Cancel
         </button>
         <button
-          type='submit'
-          onClick={modal.close}
+          type="submit"
           className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
         >
           Save
         </button>
-
       </div>
     </form>
   );

@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { X } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -6,7 +6,6 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   description?: string;
-  footer?: React.ReactNode;
 }
 
 export default function Modal({
@@ -15,7 +14,6 @@ export default function Modal({
   title,
   description,
   children,
-  footer,
 }: ModalProps) {
   if (!isOpen) return null;
 
@@ -45,7 +43,6 @@ export default function Modal({
             </button>
           </div>
           <div className="px-6 pb-6">{children}</div>
-
         </div>
       </div>
     </div>

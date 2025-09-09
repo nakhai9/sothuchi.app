@@ -1,18 +1,13 @@
-import { PageLayout } from '../components';
-import { DataGrid } from '../ui';
+import { PageLayout } from "../components";
+import { DataGrid } from "../ui";
 
-const columns = [
-  { title: 'Description', field: 'description' },
-  { title: 'Category', field: 'Category' },
-  { title: "Amount", field: "amount" }
-  // ...
-];
+const columns = [{ title: "Description", field: "description" as const }];
 
 const data = [
   {
-    description: "hello"
-  }
-]
+    description: "hello",
+  },
+];
 export default function Transactions() {
   return (
     <PageLayout title="Transactions">

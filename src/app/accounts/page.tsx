@@ -67,7 +67,7 @@ export default function Account() {
       </div>
 
       <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
-        <AccountForm modal={modal} onSuccess={} />
+        <AccountForm modal={modal} onSuccess={fetchAccounts} />
       </Modal>
     </PageLayout>
   );

@@ -39,13 +39,15 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [data, setData] = useState<any[]>([]);
   const { register, handleSubmit } = useForm<TransactionForm>({
     defaultValues: {
       type: "income",
       amount: 0,
     },
   });
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
@@ -73,11 +75,9 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
 
   const handleFileUpload = async (files: File[]) => {
     setIsScanning(true);
-    setUploadedFiles(files);
-
     try {
       const result = await SERVICES.AIService.scanReceiptWithAI(files);
-      console.log("Result from AI scan:", result);
+      setData(result);
     } catch (error) {
       console.error("Error scanning receipt:", error);
     } finally {
@@ -195,7 +195,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
 
-      <DataGrid columns={columns} data={[]} />
+      <DataGrid columns={columns} data={data} />
 
       <div className="flex justify-end gap-3">
         <button

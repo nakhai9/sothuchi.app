@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState } from 'react';
 
-import { SubmitHandler, useForm } from "react-hook-form";
+import {
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
 
-import { UseModalReturn } from "@/hooks/useModal";
-import { SERVICES } from "@/services/service";
-import { useGlobalStore } from "@/store/globalStore";
+import { UseModalReturn } from '@/hooks/useModal';
+import { SERVICES } from '@/services/service';
+import { useGlobalStore } from '@/store/globalStore';
 
 type AccountForm = {
   name: string;
@@ -49,7 +52,7 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
           type="text"
           id="name"
           {...register("name")}
-          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -63,22 +66,22 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
           type="number"
           id="amount"
           {...register("amount", { valueAsNumber: true })}
-          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
       </div>
       <div className="flex justify-end gap-3">
         <button
           type="button"
           onClick={modal.close}
-          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
+          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
+          className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-white text-sm cursor-pointer"
         >
-          Create
+          Save
         </button>
       </div>
     </form>

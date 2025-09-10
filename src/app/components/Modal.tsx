@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -37,7 +37,7 @@ export default function Modal({
             </div>
             <button
               onClick={onClose}
-              className="p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-gray-400 hover:text-gray-600 cursor-pointer"
+              className="p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               <X size={20} />
             </button>

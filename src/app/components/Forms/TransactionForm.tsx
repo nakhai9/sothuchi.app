@@ -1,14 +1,21 @@
 "use client";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from 'react';
 
-import clsx from "clsx";
-import { SubmitHandler, useForm } from "react-hook-form";
+import clsx from 'clsx';
+import {
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
 
-import { UseModalReturn } from "@/hooks/useModal";
-import { CategoryModel } from "@/models/category";
-import { SERVICES } from "@/services/service";
+import { DataGrid } from '@/app/ui';
+import { UseModalReturn } from '@/hooks/useModal';
+import { CategoryModel } from '@/models/category';
+import { SERVICES } from '@/services/service';
 
-import FileUploadZone from "../FileUploadZone";
+import FileUploadZone from '../FileUploadZone';
 
 type TransactionForm = {
   type: "income" | "expense";
@@ -20,6 +27,13 @@ type TransactionForm = {
 type TransactionFormProps = {
   modal: UseModalReturn;
 };
+
+const columns = [
+  { title: "Category", field: "categoryId" as const },
+  { title: "Description", field: "description" as const },
+  { title: "Amount", field: "amount" as const }
+];
+
 export default function TransactionForm({ modal }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [categories, setCategories] = useState<CategoryModel[]>([]);
@@ -93,7 +107,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="number"
           id="amount"
           {...register("amount", { valueAsNumber: true })}
-          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -107,7 +121,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="text"
           id="description"
           {...register("description")}
-          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -120,7 +134,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         <select
           id="categoryId"
           {...register("categoryId", { valueAsNumber: true })}
-          className="block px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         >
           {categories.length ? (
             categories.map((cat) => <option key={cat.id}>{cat.name}</option>)
@@ -139,7 +153,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="date"
           id="date"
           {...register("date")}
-          className="px-3 py-2 border border-slate-300 focus:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
       </div>
 
@@ -147,14 +161,14 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         <button
           type="button"
           onClick={modal.close}
-          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
+          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
+          className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-white text-sm cursor-pointer"
         >
           Save
         </button>
@@ -165,17 +179,20 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   const BillForm = (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
       <FileUploadZone />
+
+      <DataGrid columns={columns} data={[]} />
+
       <div className="flex justify-end gap-3">
         <button
           type="button"
           onClick={modal.close}
-          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
+          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm"
+          className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-white text-sm cursor-pointer"
         >
           Save
         </button>

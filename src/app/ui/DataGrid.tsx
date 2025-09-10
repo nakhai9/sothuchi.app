@@ -53,7 +53,7 @@ export default function DataGrid<T extends object>({
               </tr>
             ))
           ) : (
-            <tr className="py-3 w-full text-center">No data</tr>
+            <tr className="py-3 w-full text-center"><td>No data</td></tr>
           )}
         </tbody>
       </table>

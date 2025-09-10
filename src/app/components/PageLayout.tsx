@@ -19,7 +19,7 @@ export default function PageLayout({
     <div className="min-h-screen">
       <div className='bg-amber-500 w-full'>
         <div className="flex justify-between items-center mx-auto px-4 max-w-6xl h-14 text-white">
-          <div className='font-medium text-3xl'>ETApp</div>
+          <div className='font-medium text-3xl'>ExpApp</div>
           <div className='flex items-center gap-2'>
 
             <div className="flex flex-col justify-center">

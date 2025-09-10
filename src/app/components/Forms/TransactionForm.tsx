@@ -228,14 +228,72 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
 
   const BillForm = (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex gap-5">
+        <div className="flex gap-2">
+          <input
+            type="radio"
+            value="income"
+            {...register("type")}
+            id="type-income"
+          />
+          <label htmlFor="type-income" className="text-sm">
+            Income
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="radio"
+            value="expense"
+            {...register("type")}
+            id="type-expense"
+          />
+          <label htmlFor="type-expense" className="text-sm">
+            Expense
+          </label>
+        </div>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label
+          htmlFor="accountId"
+          className="block font-bold text-gray-800 text-sm"
+        >
+          Account
+        </label>
+        <select
+          id="accountId"
+          {...register("accountId", { valueAsNumber: true })}
+          className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+        >
+          <option value="" disabled selected hidden>
+            - Select -
+          </option>
+          {accounts.length ? (
+            accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.name}
+              </option>
+            ))
+          ) : (
+            <option key="other" value="0">
+              Other
+            </option>
+          )}
+        </select>
+      </div>
       <div className="max-h-[400px] overflow-auto">
         <FileUploadZone
           onFileUpload={handleFileUpload}
           isLoading={isScanning}
         />
 
-        <h4 className="my-2 font-bold text-gray-500">Scanned Transactions</h4>
-        <DataGrid columns={columns} data={data} />
+        {data.length > 0 && (
+          <>
+            <h4 className="my-2 font-bold text-gray-500">
+              Scanned Transactions
+            </h4>
+            <DataGrid columns={columns} data={data} />
+          </>
+        )}
       </div>
       <div className="flex justify-end gap-3">
         <button

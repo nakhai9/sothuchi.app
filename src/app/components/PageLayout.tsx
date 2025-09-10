@@ -32,7 +32,7 @@ export default function PageLayout({
           </div>
         </div>
       </div>
-      <main className="bg-white mx-auto mt-4 px-4 max-w-6xl max-h-[calc(100%-56px)]">
+      <main className="mx-auto mt-4 px-4 max-w-6xl max-h-[calc(100%-56px)]">
         <div className="flex justify-between items-center gap-1 mb-6">
           <div>
             <h1 className="font-bold text-gray-600 text-3xl">{title}</h1>

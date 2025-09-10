@@ -31,20 +31,21 @@ type TransactionFormProps = {
 const columns = [
   { title: "Category", field: "categoryId" as const },
   { title: "Description", field: "description" as const },
-  { title: "Amount", field: "amount" as const }
+  { title: "Amount", field: "amount" as const },
 ];
 
 export default function TransactionForm({ modal }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const { register, handleSubmit } = useForm<TransactionForm>({
     defaultValues: {
       type: "income",
       amount: 0,
     },
   });
-
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   useEffect(() => {
     const fetchCategories = async () => {
       setIsLoading(true);
@@ -68,6 +69,20 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   ) => {
     console.log(data);
     modal.close();
+  };
+
+  const handleFileUpload = async (files: File[]) => {
+    setIsScanning(true);
+    setUploadedFiles(files);
+
+    try {
+      const result = await SERVICES.AIService.scanReceiptWithAI(files);
+      console.log("Result from AI scan:", result);
+    } catch (error) {
+      console.error("Error scanning receipt:", error);
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const ManualForm = (
@@ -178,7 +193,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
 
   const BillForm = (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <FileUploadZone />
+      <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
 
       <DataGrid columns={columns} data={[]} />
 

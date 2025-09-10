@@ -95,6 +95,11 @@
     "@eslint/core" "^0.15.2"
     levn "^0.4.1"
 
+"@google/generative-ai@^0.24.1":
+  version "0.24.1"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
+  integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
+
 "@hookform/resolvers@^5.2.1":
   version "5.2.1"
   resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-5.2.1.tgz#3332b4662fe301a969ac1b795d663cf728329166"

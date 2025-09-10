@@ -31,7 +31,7 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
       await SERVICES.accountService.create({
         ...data,
         isActive: true,
-        userId: userInfo?.id as number,
+        createdById: userInfo?.id as number,
       });
     } catch (error) {
       console.log(error);

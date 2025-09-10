@@ -1,27 +1,22 @@
 "use client";
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from "react";
 
-import clsx from 'clsx';
-import {
-  SubmitHandler,
-  useForm,
-} from 'react-hook-form';
+import clsx from "clsx";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { SubmitHandler, useForm } from "react-hook-form";
 
-import { DataGrid } from '@/app/ui';
-import { UseModalReturn } from '@/hooks/useModal';
-import { AccountModel } from '@/models/account';
-import { BaseEntity } from '@/models/base';
-import { CategoryModel } from '@/models/category';
-import { ReceiptTransaction } from '@/models/transaction';
-import { SERVICES } from '@/services/service';
+import { DataGrid } from "@/app/ui";
+import { UseModalReturn } from "@/hooks/useModal";
+import { AccountModel } from "@/models/account";
+import { BaseEntity } from "@/models/base";
+import { CategoryModel } from "@/models/category";
+import { ReceiptTransaction } from "@/models/transaction";
+import { SERVICES } from "@/services/service";
+import { useGlobalStore } from "@/store/globalStore";
 
-import FileUploadZone from '../FileUploadZone';
+import FileUploadZone from "../FileUploadZone";
 
 type TransactionForm = {
-  type: "income" | "expense";
   amount: number;
   date: Date;
   description: string;
@@ -44,11 +39,11 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [accounts, setAccounts] = useState<(AccountModel & BaseEntity)[]>([]);
-
+  const [type, setType] = useState<"income" | "expense">("income");
+  const userInfo = useGlobalStore((state) => state.userInfo);
   const [data, setData] = useState<ReceiptTransaction[]>([]);
   const { register, handleSubmit } = useForm<TransactionForm>({
     defaultValues: {
-      type: "income",
       amount: 0,
     },
   });
@@ -73,7 +68,16 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
     data: TransactionForm
   ) => {
     console.log(data);
-    modal.close();
+    try {
+      await SERVICES.transactionService.create({
+        ...data,
+        type: type,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      modal.close();
+    }
   };
 
   const handleFileUpload = async (files: File[]) => {
@@ -89,31 +93,37 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
     }
   };
 
-  const ManualForm = (
+  const SwitchType = () => (
+    <div className="flex shadow-md p-1 border border-slate-300 rounded-full">
+      <button
+        type="button"
+        className={clsx(
+          `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
+          type === "income" ? "bg-amber-200" : ""
+        )}
+        onClick={() => setType("income")}
+      >
+        <TrendingDown size={14} />
+        Income
+      </button>
+      <button
+        type="button"
+        className={clsx(
+          `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
+          type === "expense" ? "bg-amber-200" : ""
+        )}
+        onClick={() => setType("expense")}
+      >
+        <TrendingUp size={14} />
+        Expense
+      </button>
+    </div>
+  );
+
+  const ManualForm = () => (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex gap-5">
-        <div className="flex gap-2">
-          <input
-            type="radio"
-            value="income"
-            {...register("type")}
-            id="type-income"
-          />
-          <label htmlFor="type-income" className="text-sm">
-            Income
-          </label>
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="radio"
-            value="expense"
-            {...register("type")}
-            id="type-expense"
-          />
-          <label htmlFor="type-expense" className="text-sm">
-            Expense
-          </label>
-        </div>
+      <div className="flex justify-center items-center gap-5">
+        <SwitchType />
       </div>
       <div className="flex flex-col gap-1">
         <label
@@ -226,31 +236,10 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
     </form>
   );
 
-  const BillForm = (
+  const BillForm = () => (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <div className="flex gap-5">
-        <div className="flex gap-2">
-          <input
-            type="radio"
-            value="income"
-            {...register("type")}
-            id="type-income"
-          />
-          <label htmlFor="type-income" className="text-sm">
-            Income
-          </label>
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="radio"
-            value="expense"
-            {...register("type")}
-            id="type-expense"
-          />
-          <label htmlFor="type-expense" className="text-sm">
-            Expense
-          </label>
-        </div>
+      <div className="flex justify-center items-center gap-5">
+        <SwitchType />
       </div>
       <div className="flex flex-col gap-1">
         <label
@@ -337,7 +326,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           From bill image
         </button>
       </div>
-      {mode === "manual" ? ManualForm : BillForm}
+      {mode === "manual" ? <ManualForm /> : <BillForm />}
     </div>
   );
 }

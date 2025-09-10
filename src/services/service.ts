@@ -7,7 +7,10 @@ import {
   ResponseBase,
 } from '@/models/base';
 import { CategoryModel } from '@/models/category';
-import { ReceiptTransaction } from '@/models/transaction';
+import {
+  ReceiptTransaction,
+  TransactionModel,
+} from '@/models/transaction';
 import { UserInfo } from '@/models/user';
 
 import { httpService } from './httpService';
@@ -43,6 +46,13 @@ export const SERVICES = {
         return data;
       } catch (error) {
         console.log(error);
+      }
+    },
+    create: async (payload: TransactionModel): Promise<void> => {
+      try {
+        await httpService.post(BASE_URLS.transactions, payload);
+      } catch (error) {
+        console.error(error);
       }
     },
   },

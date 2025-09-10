@@ -83,7 +83,9 @@ export default function Account() {
           }
         </div>
         <div className='flex-1'>
-          Recent transactions of <span className='fw-bold'>{selectedAccount?.name}</span>
+          {
+            selectedAccount ? (<>Recent transactions of <span className='font-bold'>{selectedAccount?.name}</span></>) : "Recent transactions"
+          }
         </div>
       </div>
 

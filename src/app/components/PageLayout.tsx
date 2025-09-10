@@ -13,7 +13,7 @@ export default function PageLayout({
 }: PageLayoutProps) {
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="mx-auto px-4 py-8 max-w-5xl">
+      <div className="mx-auto px-8 md:px-4 py-8 max-w-5xl">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="font-bold text-gray-600 text-3xl">{title}</h1>

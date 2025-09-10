@@ -69,7 +69,7 @@ export default function Account() {
   return (
     <PageLayout title="Accounts" description='Manage your accounts with ease – add, edit, and monitor balances for better money control.' actions={actions}>
       <div className="flex gap-4">
-        <div className="flex flex-col gap-10 w-80 h-80 overflow-auto">
+        <div className="flex flex-col gap-6 w-80 h-80 overflow-auto">
           {
             accounts.length ? accounts.map((account) => (<div key={account.id} onClick={() => setAccount(account)} className={clsx(`flex justify-between items-center hover:bg-amber-400 shadow-md px-6 py-2 border border-slate-300 rounded-full w-full`, account.id === selectedAccount?.id && "bg-amber-500")}>
               <div>
@@ -83,7 +83,7 @@ export default function Account() {
           }
         </div>
         <div className='flex-1'>
-          Recent transactions of {selectedAccount?.name}
+          Recent transactions of <span className='fw-bold'>{selectedAccount?.name}</span>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import clsx from "clsx";
+import clsx from 'clsx';
 
 type DataGridColumn<T> = {
   title: string;
@@ -26,7 +26,7 @@ export default function DataGrid<T extends object>({
             {columns.map((column) => (
               <th
                 key={column["title"]}
-                className="px-6 py-3 font-medium text-gray-600 text-xs text-left uppercase tracking-wider"
+                className="px-5 py-3 font-medium text-gray-600 text-xs text-left uppercase tracking-wider"
               >
                 {column.title}
               </th>
@@ -41,7 +41,7 @@ export default function DataGrid<T extends object>({
                   <td
                     key={`${rowIndex}-${String(column["title"])}`}
                     className={clsx(
-                      `px-6 py-4 text-gray-800 text-sm whitespace-nowrap`,
+                      `px-5 py-3 text-gray-800 text-sm whitespace-nowrap`,
                       rowIndex % 2 === 0 && "bg-gray-100"
                     )}
                   >

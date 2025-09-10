@@ -27,7 +27,7 @@ export default function Modal({
 
       {/* Modal */}
       <div className="flex justify-center items-center p-4 min-h-full">
-        <div className="relative bg-white shadow-xl rounded-lg w-full max-w-md overflow-hidden">
+        <div className="relative bg-white shadow-xl rounded-lg w-full max-w-xl overflow-hidden">
           <div className="flex justify-between items-center p-4 px-6">
             <div className="flex flex-col">
               <h3 className="font-semibold text-slate-700 text-lg">{title}</h3>

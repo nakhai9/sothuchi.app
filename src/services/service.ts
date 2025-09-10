@@ -7,6 +7,7 @@ import {
   ResponseBase,
 } from '@/models/base';
 import { CategoryModel } from '@/models/category';
+import { ReceiptTransaction } from '@/models/transaction';
 import { UserInfo } from '@/models/user';
 
 import { httpService } from './httpService';
@@ -20,7 +21,7 @@ const BASE_URLS = {
 export const SERVICES = {
   // Category Service
   categoryService: {
-    getCategories: async (): Promise<CategoryModel[] | undefined> => {
+    getAll: async (): Promise<CategoryModel[] | undefined> => {
       try {
         const { data } = await httpService.get<ResponseBase<CategoryModel[]>>(
           BASE_URLS.categories
@@ -34,7 +35,7 @@ export const SERVICES = {
 
   // Transaction Service
   transactionService: {
-    getTransactions: async (): Promise<CategoryModel[] | undefined> => {
+    getAll: async (): Promise<CategoryModel[] | undefined> => {
       try {
         const { data } = await httpService.get<ResponseBase<CategoryModel[]>>(
           BASE_URLS.transactions
@@ -55,14 +56,19 @@ export const SERVICES = {
         console.log(error);
       }
     },
-    getAccounts: async (): Promise<
-      (AccountModel & BaseEntity)[] | undefined
-    > => {
+    getAll: async (): Promise<(AccountModel & BaseEntity)[] | undefined> => {
       try {
         const { data } = await httpService.get<
           ResponseBase<(AccountModel & BaseEntity)[]>
         >(BASE_URLS.accounts);
         return data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    softDelete: async (id: number): Promise<void> => {
+      try {
+        await httpService.delete(`${BASE_URLS.accounts}/${id}`);
       } catch (error) {
         console.log(error);
       }
@@ -81,8 +87,9 @@ export const SERVICES = {
     },
   },
 
+  // AI Service
   AIService: {
-    scanReceiptWithAI: async (files: File[]) => {
+    scanReceiptWithAI: async (files: File[]): Promise<ReceiptTransaction[]> => {
       const systemPrompt = `
     You are an expert at extracting information from receipts.
 
@@ -93,7 +100,7 @@ export const SERVICES = {
 
     Output format (TypeScript type):
     export type TransactionModel = {
-      description: string; // item name
+      description: string; // item name, including quantity if visible (e.g., "Hong Tra Sua (x2)")
       amount: number;      // item price
       date: Date;          // receipt date, format YYYY-M-D (no leading zero in day or month)
     }

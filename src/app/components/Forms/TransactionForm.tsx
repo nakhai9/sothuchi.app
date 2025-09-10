@@ -12,7 +12,10 @@ import {
 
 import { DataGrid } from '@/app/ui';
 import { UseModalReturn } from '@/hooks/useModal';
+import { AccountModel } from '@/models/account';
+import { BaseEntity } from '@/models/base';
 import { CategoryModel } from '@/models/category';
+import { ReceiptTransaction } from '@/models/transaction';
 import { SERVICES } from '@/services/service';
 
 import FileUploadZone from '../FileUploadZone';
@@ -23,15 +26,16 @@ type TransactionForm = {
   date: Date;
   description: string;
   categoryId: number;
+  accountId: number;
 };
 type TransactionFormProps = {
   modal: UseModalReturn;
 };
 
 const columns = [
-  { title: "Category", field: "categoryId" as const },
   { title: "Description", field: "description" as const },
   { title: "Amount", field: "amount" as const },
+  { title: "Date", field: "date" as const },
 ];
 
 export default function TransactionForm({ modal }: TransactionFormProps) {
@@ -39,8 +43,9 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [data, setData] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<(AccountModel & BaseEntity)[]>([]);
+
+  const [data, setData] = useState<ReceiptTransaction[]>([]);
   const { register, handleSubmit } = useForm<TransactionForm>({
     defaultValues: {
       type: "income",
@@ -49,21 +54,19 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   });
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      setIsLoading(true);
+    const fetchData = async () => {
       try {
-        const categories = await SERVICES.categoryService.getCategories();
-        if (categories) {
-          setCategories(categories);
-        }
+        const accounts = await SERVICES.accountService.getAll();
+        if (accounts) setAccounts(accounts);
+
+        const categories = await SERVICES.categoryService.getAll();
+        if (categories) setCategories(categories);
       } catch (error) {
         console.log(error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
   const onSubmit: SubmitHandler<TransactionForm> = async (
@@ -74,6 +77,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   };
 
   const handleFileUpload = async (files: File[]) => {
+    if (files.length === 0) return;
     setIsScanning(true);
     try {
       const result = await SERVICES.AIService.scanReceiptWithAI(files);
@@ -141,6 +145,34 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
       </div>
       <div className="flex flex-col gap-1">
         <label
+          htmlFor="accountId"
+          className="block font-bold text-gray-800 text-sm"
+        >
+          Account
+        </label>
+        <select
+          id="accountId"
+          {...register("accountId", { valueAsNumber: true })}
+          className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+        >
+          <option value="" disabled selected hidden>
+            - Select -
+          </option>
+          {accounts.length ? (
+            accounts.map((account) => (
+              <option key={account.id} value={account.id}>
+                {account.name}
+              </option>
+            ))
+          ) : (
+            <option key="other" value="0">
+              Other
+            </option>
+          )}
+        </select>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label
           htmlFor="description"
           className="block font-bold text-gray-800 text-sm"
         >
@@ -151,6 +183,9 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           {...register("categoryId", { valueAsNumber: true })}
           className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         >
+          <option value="" disabled selected hidden>
+            - Select -
+          </option>
           {categories.length ? (
             categories.map((cat) => <option key={cat.id}>{cat.name}</option>)
           ) : (
@@ -193,10 +228,15 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
 
   const BillForm = (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
-      <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
+      <div className="max-h-[400px] overflow-auto">
+        <FileUploadZone
+          onFileUpload={handleFileUpload}
+          isLoading={isScanning}
+        />
 
-      <DataGrid columns={columns} data={data} />
-
+        <h4 className="my-2 font-bold text-gray-500">Scanned Transactions</h4>
+        <DataGrid columns={columns} data={data} />
+      </div>
       <div className="flex justify-end gap-3">
         <button
           type="button"

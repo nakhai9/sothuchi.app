@@ -19,7 +19,7 @@ export default function DataGrid<T extends object>({
   data,
 }: DataGridProps<T>) {
   return (
-    <div className="shadow-xl rounded-md overflow-x-auto">
+    <div className="overflow-x-auto">
       <table className="divide-y divide-gray-50 min-w-full overflow-hidden">
         <thead className="bg-slate-200">
           <tr>

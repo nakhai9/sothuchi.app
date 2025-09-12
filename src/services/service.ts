@@ -1,24 +1,23 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import { Utils } from '@/lib/utils';
-import { AccountModel } from '@/models/account';
-import {
-  BaseEntity,
-  ResponseBase,
-} from '@/models/base';
-import { CategoryModel } from '@/models/category';
-import {
-  ReceiptTransaction,
-  TransactionModel,
-} from '@/models/transaction';
-import { UserInfo } from '@/models/user';
+import { Utils } from "@/lib/utils";
+import { AccountModel } from "@/models/account";
+import { BaseEntity, ResponseBase } from "@/models/base";
+import { CategoryModel } from "@/models/category";
+import { ReceiptTransaction, TransactionModel } from "@/models/transaction";
+import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/models/user";
 
-import { httpService } from './httpService';
+import { httpService } from "./httpService";
+import { log } from "console";
 
 const BASE_URLS = {
   categories: "api/v1/categories",
   transactions: "api/v1/transactions",
   accounts: "api/v1/accounts",
+  auth: {
+    signIn: "auth/sign-in",
+    signUp: "auth/sign-up",
+  },
 };
 
 export const SERVICES = {
@@ -153,6 +152,31 @@ export const SERVICES = {
       const response = await model.generateContent(content);
       const result = response.response.text();
       return JSON.parse(result);
+    },
+  },
+
+  // Auth Service
+
+  authService: {
+    signIn: async (userLogin: UserLogin): Promise<UserToken> => {
+      try {
+        const token = await httpService.post<UserToken, UserLogin>(
+          BASE_URLS.auth.signIn,
+          userLogin
+        );
+        return token;
+      } catch (error) {
+        console.error("SignIn error:", error);
+        throw error;
+      }
+    },
+    signUp: async (userSignUp: UserSignUp): Promise<void> => {
+      try {
+        await httpService.post(BASE_URLS.auth.signUp, userSignUp);
+      } catch (error) {
+        console.error("SignIn error:", error);
+        throw error;
+      }
     },
   },
 };

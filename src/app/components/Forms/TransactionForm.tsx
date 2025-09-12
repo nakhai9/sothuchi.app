@@ -162,10 +162,10 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         </label>
         <select
           id="accountId"
-          {...register("accountId", { valueAsNumber: true })}
+          {...register("accountId")}
           className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         >
-          <option value="" disabled selected hidden>
+          <option value="--Select--" disabled selected hidden>
             - Select -
           </option>
           {accounts.length ? (
@@ -190,10 +190,10 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         </label>
         <select
           id="categoryId"
-          {...register("categoryId", { valueAsNumber: true })}
+          {...register("categoryId")}
           className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         >
-          <option value="" disabled selected hidden>
+          <option value="--Select--" disabled selected hidden>
             - Select -
           </option>
           {categories.length ? (

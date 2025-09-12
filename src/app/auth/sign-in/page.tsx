@@ -30,7 +30,7 @@ export default function SignInPage() {
         <h2 className="mb-6 font-bold text-amber-600 text-2xl sm:text-3xl text-center">
           Sign In
         </h2>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="email"

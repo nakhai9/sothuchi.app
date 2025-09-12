@@ -15,8 +15,9 @@ export default function PageLayout({
   description
 }: PageLayoutProps) {
   const userInfo = useGlobalStore(state => state.userInfo);
+  const isLoading = useGlobalStore(state => state.isLoading);
   return (
-    <div className="min-h-screen">
+    <div className="relative min-h-screen">
       <div className='bg-amber-500 w-full'>
         <div className="flex justify-between items-center mx-auto px-4 max-w-6xl h-14 text-white">
           <div className='font-medium text-3xl'>ExpApp</div>
@@ -48,6 +49,11 @@ export default function PageLayout({
         </div>
         {children}
       </main>
+      {
+        isLoading && <div className="z-10 fixed inset-0 flex justify-center items-center bg-gray-300/50 h-screen">
+          <div className="shadow-lg border-5 border-amber-500 border-t-transparent rounded-full w-12 h-12 animate-spin"></div>
+        </div>
+      }
     </div>
   );
 }

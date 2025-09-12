@@ -2,7 +2,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: "https://sothuchi-apis.onrender.com",
+  baseURL: "http://localhost:4200",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

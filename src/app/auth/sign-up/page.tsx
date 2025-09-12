@@ -1,6 +1,7 @@
 "use client"
 import { AuthLayout } from "@/app/components";
 import { SERVICES } from "@/services/service";
+import { useGlobalStore } from "@/store/globalStore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -11,17 +12,19 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const setLoading = useGlobalStore(state => state.setLoading);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await SERVICES.authService.signUp({
         email, firstName, lastName, password
       })
-
       router.push('/auth/sign-in')
-
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,7 +105,6 @@ export default function SignUpPage() {
           Sign up
         </button>
       </form>
-
     </AuthLayout>
   );
 }

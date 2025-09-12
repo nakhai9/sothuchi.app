@@ -43,7 +43,6 @@ export default function Transactions() {
 
       <DataGrid columns={columns} data={data} />
 
-
       <Modal
         isOpen={modal.isOpen}
         onClose={modal.close}

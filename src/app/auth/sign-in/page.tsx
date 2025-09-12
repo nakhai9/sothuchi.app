@@ -5,15 +5,18 @@ import { useRef, useState } from "react";
 import { setCookie } from 'cookies-next'
 import Link from "next/link";
 import { AuthLayout } from "@/app/components";
+import { useGlobalStore } from "@/store/globalStore";
 export default function SignInPage() {
 
   const router = useRouter()
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const setLoading = useGlobalStore(state => state.setLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const token = await SERVICES.authService.signIn({ email, password })
       if (token.accessToken.length > 0) {
@@ -24,6 +27,8 @@ export default function SignInPage() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false)
     }
   };
 
@@ -93,7 +98,7 @@ export default function SignInPage() {
       </form>
       <p className="mt-4 text-gray-600 text-sm text-center">
         Do not have an account?
-        <Link href="#" className="text-amber-600 hover:text-amber-800">
+        <Link href="/auth/sign-up" className="ml-2 text-amber-600 hover:text-amber-800">
           Sign up
         </Link>
       </p>

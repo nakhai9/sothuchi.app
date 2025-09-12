@@ -19,5 +19,4 @@ export type UserSignUp = {
   firstName: string;
   email: string;
   password: string;
-  phone: string;
 };

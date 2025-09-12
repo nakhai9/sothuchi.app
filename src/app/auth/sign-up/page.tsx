@@ -1,4 +1,5 @@
 "use client"
+import { AuthLayout } from "@/app/components";
 import { SERVICES } from "@/services/service";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -6,17 +7,15 @@ import { useState } from "react";
 export default function SignUpPage() {
 
   const router = useRouter()
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await SERVICES.authService.signUp({
-        email, firstName, lastName, password, phone
+        email, firstName, lastName, password
       })
 
       router.push('/auth/sign-in')
@@ -27,62 +26,83 @@ export default function SignUpPage() {
   };
 
   return (
-    <div>
-      <h1>Sign Up Page</h1>
+    <AuthLayout title="Sign up">
       <form onSubmit={handleSubmit}>
-        <div>
-          <label>First name: </label>
+        <div className="flex gap-3">
+          <div className="mb-4">
+            <label
+              htmlFor="firstName"
+              className="block font-semibold text-gray-700 text-sm"
+            >
+              First name
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
+              placeholder="First name"
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="lastName"
+              className="block font-semibold text-gray-700 text-sm"
+            >
+              Last name
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
+              placeholder="Last name"
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="email"
+            className="block font-semibold text-gray-700 text-sm"
+          >
+            Email
+          </label>
           <input
             type="text"
-            value={firstName}
-            className="border border-slate-400"
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Last name: </label>
-          <input
-            type="text"
-            value={lastName}
-            className="border border-slate-400"
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email: </label>
-          <input
-            type="email"
-            value={email}
-            className="border border-slate-400"
+            id="email"
+            name="email"
+            className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
+            placeholder="Email"
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
         </div>
-        <div>
-          <label>Phone: </label>
-          <input
-            type="text"
-            value={phone}
-            className="border border-slate-400"
-            onChange={(e) => setPhone(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password: </label>
+        <div className="mb-4">
+          <label
+            htmlFor="password"
+            className="block font-semibold text-gray-700 text-sm"
+          >
+            Password
+          </label>
           <input
             type="password"
-            value={password}
-            className="border border-slate-400"
+            id="password"
+            name="password"
+            className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
+            placeholder="Your password"
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
         </div>
 
-        <button type="submit" className="p-4 border border-slate-400 rounded cursor-pointer">Sign Up</button>
+        <button
+          type="submit"
+          className="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 w-full text-white text-sm sm:text-base cursor-pointer"
+        >
+          Sign up
+        </button>
       </form>
-    </div>
+
+    </AuthLayout>
   );
 }

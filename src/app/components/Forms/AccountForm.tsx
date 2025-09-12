@@ -24,9 +24,9 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
   const { register, handleSubmit } = useForm<AccountForm>();
 
   const userInfo = useGlobalStore((state) => state.userInfo);
-  const [isLoading, setIsLoading] = useState(false);
+  const setLoading = useGlobalStore(state => state.setLoading);
   const onSubmit: SubmitHandler<AccountForm> = async (data: AccountForm) => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       await SERVICES.accountService.create({
         ...data,
@@ -36,7 +36,7 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
       modal?.close();
       onSuccess?.();
     }

@@ -1,5 +1,6 @@
 // utils/httpService.ts
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
+import { getCookie } from "cookies-next";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: "http://localhost:4200",
@@ -12,7 +13,7 @@ const axiosInstance: AxiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = getCookie("accessToken");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

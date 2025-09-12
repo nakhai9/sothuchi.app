@@ -25,6 +25,7 @@ import {
   DataGrid,
   IconButton,
 } from '../ui';
+import { useGlobalStore } from '@/store/globalStore';
 
 const columns = [
   { title: "Category", field: "categoryId" as const },
@@ -35,10 +36,11 @@ const columns = [
 export default function Account() {
   const modal = useModal();
   const [accounts, setAccounts] = useState<(AccountModel & BaseEntity)[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<
     (AccountModel & BaseEntity) | null
   >(null);
+
+  const setLoading = useGlobalStore(state => state.setLoading);
 
   const handleOpenAccountModal = () => {
     modal.open();
@@ -49,7 +51,7 @@ export default function Account() {
   };
 
   const fetchAccounts = useCallback(async () => {
-    setIsLoading(true);
+    setLoading(true);
     try {
       const accounts = await SERVICES.accountService.getAll();
       if (accounts) {
@@ -61,17 +63,19 @@ export default function Account() {
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }, []);
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
+    setLoading(true);
     try {
       await SERVICES.accountService.softDelete(id);
     } catch (error) {
       console.log(error);
     } finally {
+      setLoading(false);
       fetchAccounts();
     }
   };

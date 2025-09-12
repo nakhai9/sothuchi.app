@@ -48,6 +48,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
     },
   });
 
+  const setLoading = useGlobalStore(state => state.setLoading);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -67,7 +69,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   const onSubmit: SubmitHandler<TransactionForm> = async (
     data: TransactionForm
   ) => {
-    console.log(data);
+    setLoading(true);
     try {
       await SERVICES.transactionService.create({
         ...data,
@@ -77,6 +79,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
       console.error(error);
     } finally {
       modal.close();
+      setLoading(false)
     }
   };
 
@@ -165,7 +168,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           {...register("accountId")}
           className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         >
-          <option value="--Select--" disabled selected hidden>
+          <option value="" disabled selected hidden>
             - Select -
           </option>
           {accounts.length ? (
@@ -193,7 +196,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           {...register("categoryId")}
           className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         >
-          <option value="--Select--" disabled selected hidden>
+          <option value="" disabled selected hidden>
             - Select -
           </option>
           {categories.length ? (

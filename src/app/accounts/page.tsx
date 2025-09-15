@@ -26,6 +26,7 @@ import {
   IconButton,
 } from '../ui';
 import { useGlobalStore } from '@/store/globalStore';
+import toast from 'react-hot-toast';
 
 const columns = [
   { title: "Category", field: "categoryId" as const },
@@ -61,7 +62,7 @@ export default function Account() {
         }
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to fetch accounts");
     } finally {
       setLoading(false);
     }
@@ -73,9 +74,10 @@ export default function Account() {
     try {
       await SERVICES.AccountService.softDelete(id);
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to delete account");
     } finally {
       setLoading(false);
+      toast.success("Account deleted successfully");
       fetchAccounts();
     }
   };

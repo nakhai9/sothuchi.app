@@ -8,7 +8,6 @@ import { ReceiptTransaction, TransactionModel } from "@/models/transaction";
 import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/models/user";
 
 import { httpService } from "./httpService";
-import { log } from "console";
 
 const BASE_URLS = {
   categories: "api/v1/categories",
@@ -18,7 +17,7 @@ const BASE_URLS = {
     signIn: "auth/sign-in",
     signUp: "auth/sign-up",
   },
-  user: "users",
+  user: "api/v1users",
 };
 
 export const SERVICES = {

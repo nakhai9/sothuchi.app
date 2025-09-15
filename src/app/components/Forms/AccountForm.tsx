@@ -10,6 +10,7 @@ import {
 import { UseModalReturn } from '@/hooks/useModal';
 import { SERVICES } from '@/services/service';
 import { useGlobalStore } from '@/store/globalStore';
+import toast from 'react-hot-toast';
 
 type AccountForm = {
   name: string;
@@ -21,7 +22,7 @@ type AccountFormProps = {
   onSuccess?: () => void;
 };
 export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
-  const { register, handleSubmit } = useForm<AccountForm>();
+  const { register, handleSubmit, formState: { errors } } = useForm<AccountForm>();
 
   const userInfo = useGlobalStore((state) => state.userInfo);
   const setLoading = useGlobalStore(state => state.setLoading);
@@ -30,14 +31,13 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
     try {
       await SERVICES.AccountService.create({
         ...data,
-        isActive: true,
-        createdById: userInfo?.id as number,
       });
     } catch (error) {
-      console.log(error);
+      toast.error("Failed to create account");
     } finally {
       setLoading(false);
       modal?.close();
+      toast.success("Account created successfully");
       onSuccess?.();
     }
   };

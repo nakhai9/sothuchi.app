@@ -1,15 +1,15 @@
 "use client";
 
+import { useGlobalStore } from "@/store/globalStore";
 import "./globals.css";
 
-import { useEffect } from "react";
-
 import { Geist, Geist_Mono } from "next/font/google";
-
-import { SERVICES } from "@/services/service";
-import { useGlobalStore } from "@/store/globalStore";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { getCookie } from "cookies-next";
+import { useEffect } from "react";
+import { SERVICES } from "@/services/service";
+import { useRouter } from "next/navigation";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,21 +25,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const router = useRouter();
+
+  const userInfo = useGlobalStore((state) => state.userInfo);
   const setUserInfo = useGlobalStore((state) => state.setUserInfo);
+
+  const token = getCookie("accessToken");
+
   useEffect(() => {
     const fetchUserInfo = async () => {
-      const userInfo = await SERVICES.UserService.getUserInfo();
-      setUserInfo(userInfo);
+      if (token && !userInfo) {
+        const userInfo = await SERVICES.UserService.getUserInfo();
+        if (userInfo) {
+          setUserInfo(userInfo);
+        }
+      }
+
+      if (!token && !userInfo) {
+        router.push("/auth/sign-in");
+      }
     };
-
-    const token = getCookie("accessToken");
-
-    if (token) {
-      fetchUserInfo();
-    }
-
-
-  }, [setUserInfo]);
+    fetchUserInfo();
+  }, []);
 
   return (
     <html lang="en">

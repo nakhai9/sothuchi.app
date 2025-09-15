@@ -1,18 +1,26 @@
 "use client";
-import { SERVICES } from "@/services/service";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
+
 import { setCookie } from "cookies-next";
 import Link from "next/link";
-import { AuthLayout } from "@/app/components";
-import { useGlobalStore } from "@/store/globalStore";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+
+import { AuthLayout } from "@/app/components";
+import { SERVICES } from "@/services/service";
+import { useGlobalStore } from "@/store/globalStore";
+
 export default function SignInPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState(process.env.NEXT_PUBLIC_SYSTEM_EMAIL ?? "");
-  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_SYSTEM_PASSWORD ?? "");
+  const [email, setEmail] = useState(
+    process.env.NEXT_PUBLIC_SYSTEM_EMAIL ?? ""
+  );
+  const [password, setPassword] = useState(
+    process.env.NEXT_PUBLIC_SYSTEM_PASSWORD ?? ""
+  );
   const setLoading = useGlobalStore((state) => state.setLoading);
+  const setUserInfo = useGlobalStore((state) => state.setUserInfo);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,8 +32,13 @@ export default function SignInPage() {
         setCookie("accessToken", token.accessToken, {
           maxAge: 60 * 60,
         });
-        router.push("/dashboard");
-        toast.success("Logged successfully");
+
+        const userInfo = await SERVICES.UserService.getUserInfo();
+        setUserInfo(userInfo);
+        if (userInfo) {
+          router.push("/dashboard");
+          toast.success("Logged successfully");
+        }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

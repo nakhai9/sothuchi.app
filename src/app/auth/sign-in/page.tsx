@@ -1,34 +1,38 @@
-"use client"
+"use client";
 import { SERVICES } from "@/services/service";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { setCookie } from 'cookies-next'
+import { setCookie } from "cookies-next";
 import Link from "next/link";
 import { AuthLayout } from "@/app/components";
 import { useGlobalStore } from "@/store/globalStore";
+import toast from "react-hot-toast";
 export default function SignInPage() {
-
-  const router = useRouter()
+  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const setLoading = useGlobalStore(state => state.setLoading);
+  const setLoading = useGlobalStore((state) => state.setLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     try {
-      const token = await SERVICES.authService.signIn({ email, password })
+      const token = await SERVICES.authService.signIn({ email, password });
       if (token.accessToken.length > 0) {
-        setCookie('accessToken', token.accessToken, {
+        setCookie("accessToken", token.accessToken, {
           maxAge: 60 * 60,
         });
-        router.push('/dashboard')
+        router.push("/dashboard");
       }
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        "Something went wrong. Please try again!";
+      toast.error(msg);
     } finally {
-      setLoading(false)
+      setLoading(false);
+      toast.success("Logged successfully");
     }
   };
 
@@ -65,7 +69,6 @@ export default function SignInPage() {
             className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
             placeholder="Your password"
             onChange={(e) => setPassword(e.target.value)}
-
           />
         </div>
         <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center space-y-4 sm:space-y-0 mb-6">
@@ -98,7 +101,10 @@ export default function SignInPage() {
       </form>
       <p className="mt-4 text-gray-600 text-sm text-center">
         Do not have an account?
-        <Link href="/auth/sign-up" className="ml-2 text-amber-600 hover:text-amber-800">
+        <Link
+          href="/auth/sign-up"
+          className="ml-2 text-amber-600 hover:text-amber-800"
+        >
           Sign up
         </Link>
       </p>

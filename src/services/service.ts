@@ -172,6 +172,8 @@ export const SERVICES = {
     },
     signUp: async (userSignUp: UserSignUp): Promise<void> => {
       try {
+        console.log(userSignUp);
+
         await httpService.post(BASE_URLS.auth.signUp, userSignUp);
       } catch (error) {
         console.error("SignIn error:", error);

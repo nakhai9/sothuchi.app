@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
 import { getCookie } from "cookies-next";
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: "http://localhost:4200",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4200",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -20,12 +20,12 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error.response.data.message)
 );
 
 axiosInstance.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error.response.data.message)
 );
 
 // GET

@@ -18,11 +18,12 @@ const BASE_URLS = {
     signIn: "auth/sign-in",
     signUp: "auth/sign-up",
   },
+  user: "users",
 };
 
 export const SERVICES = {
   // Category Service
-  categoryService: {
+  CategoryService: {
     getAll: async (): Promise<CategoryModel[] | undefined> => {
       try {
         const { data } = await httpService.get<ResponseBase<CategoryModel[]>>(
@@ -36,7 +37,7 @@ export const SERVICES = {
   },
 
   // Transaction Service
-  transactionService: {
+  TransactionService: {
     getAll: async (): Promise<CategoryModel[] | undefined> => {
       try {
         const { data } = await httpService.get<ResponseBase<CategoryModel[]>>(
@@ -57,7 +58,7 @@ export const SERVICES = {
   },
 
   // Account Service
-  accountService: {
+  AccountService: {
     create: async (payload: AccountModel): Promise<void> => {
       try {
         await httpService.post(BASE_URLS.accounts, payload);
@@ -81,18 +82,6 @@ export const SERVICES = {
       } catch (error) {
         console.log(error);
       }
-    },
-  },
-
-  // User Service
-  userService: {
-    getUserInfo: async (): Promise<UserInfo> => {
-      return Promise.resolve({
-        id: 1,
-        firstName: "John",
-        lastName: "Doe",
-        email: "john@example.com",
-      });
     },
   },
 
@@ -157,16 +146,15 @@ export const SERVICES = {
 
   // Auth Service
 
-  authService: {
+  AuthService: {
     signIn: async (userLogin: UserLogin): Promise<UserToken> => {
       try {
-        const token = await httpService.post<UserToken, UserLogin>(
+        const { data } = await httpService.post<ResponseBase<UserToken>>(
           BASE_URLS.auth.signIn,
           userLogin
         );
-        return token;
+        return data;
       } catch (error) {
-        console.error("SignIn error:", error);
         throw error;
       }
     },
@@ -176,7 +164,19 @@ export const SERVICES = {
 
         await httpService.post(BASE_URLS.auth.signUp, userSignUp);
       } catch (error) {
-        console.error("SignIn error:", error);
+        throw error;
+      }
+    },
+  },
+
+  UserService: {
+    getUserInfo: async (): Promise<UserInfo> => {
+      try {
+        const { data } = await httpService.get<ResponseBase<UserInfo>>(
+          `${BASE_URLS.user}/me`
+        );
+        return data;
+      } catch (error) {
         throw error;
       }
     },

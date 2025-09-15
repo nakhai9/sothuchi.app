@@ -53,10 +53,10 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const accounts = await SERVICES.accountService.getAll();
+        const accounts = await SERVICES.AccountService.getAll();
         if (accounts) setAccounts(accounts);
 
-        const categories = await SERVICES.categoryService.getAll();
+        const categories = await SERVICES.CategoryService.getAll();
         if (categories) setCategories(categories);
       } catch (error) {
         console.log(error);
@@ -71,7 +71,7 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   ) => {
     setLoading(true);
     try {
-      await SERVICES.transactionService.create({
+      await SERVICES.TransactionService.create({
         ...data,
         type: type,
       });

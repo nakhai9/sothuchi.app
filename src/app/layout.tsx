@@ -9,6 +9,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SERVICES } from "@/services/service";
 import { useGlobalStore } from "@/store/globalStore";
 import toast, { Toaster } from "react-hot-toast";
+import { getCookie } from "cookies-next";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,11 +28,17 @@ export default function RootLayout({
   const setUserInfo = useGlobalStore((state) => state.setUserInfo);
   useEffect(() => {
     const fetchUserInfo = async () => {
-      const userInfo = await SERVICES.userService.getUserInfo();
+      const userInfo = await SERVICES.UserService.getUserInfo();
       setUserInfo(userInfo);
     };
 
-    fetchUserInfo();
+    const token = getCookie("accessToken");
+
+    if (token) {
+      fetchUserInfo();
+    }
+
+
   }, [setUserInfo]);
 
   return (

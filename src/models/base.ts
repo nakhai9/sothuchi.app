@@ -6,7 +6,8 @@ export type BaseEntity = {
 };
 
 export type ResponseBase<T> = {
-  status: boolean;
+  code: number;
+  statusCode: number;
   data: T;
-  message: string;
+  message: string | string[];
 };

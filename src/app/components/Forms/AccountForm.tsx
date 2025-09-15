@@ -28,7 +28,7 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
   const onSubmit: SubmitHandler<AccountForm> = async (data: AccountForm) => {
     setLoading(true);
     try {
-      await SERVICES.accountService.create({
+      await SERVICES.AccountService.create({
         ...data,
         isActive: true,
         createdById: userInfo?.id as number,

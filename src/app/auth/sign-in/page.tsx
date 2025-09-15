@@ -10,29 +10,28 @@ import toast from "react-hot-toast";
 export default function SignInPage() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(process.env.NEXT_PUBLIC_SYSTEM_EMAIL ?? "");
+  const [password, setPassword] = useState(process.env.NEXT_PUBLIC_SYSTEM_PASSWORD ?? "");
   const setLoading = useGlobalStore((state) => state.setLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const token = await SERVICES.authService.signIn({ email, password });
-      if (token.accessToken.length > 0) {
+      const token = await SERVICES.AuthService.signIn({ email, password });
+      if (token && token.accessToken.length > 0) {
         setCookie("accessToken", token.accessToken, {
           maxAge: 60 * 60,
         });
         router.push("/dashboard");
+        toast.success("Logged successfully");
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        "Something went wrong. Please try again!";
-      toast.error(msg);
+      toast.error("User email or password is incorrect");
     } finally {
       setLoading(false);
-      toast.success("Logged successfully");
     }
   };
 
@@ -53,6 +52,7 @@ export default function SignInPage() {
             className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
             placeholder="Username"
             onChange={(e) => setEmail(e.target.value)}
+            value={email}
           />
         </div>
         <div className="mb-6">
@@ -69,6 +69,7 @@ export default function SignInPage() {
             className="block shadow-sm mt-1 px-3 py-2 border border-gray-300 focus:border-amber-500 rounded-md focus:outline-none focus:ring-amber-500 w-full text-sm sm:text-base"
             placeholder="Your password"
             onChange={(e) => setPassword(e.target.value)}
+            value={password}
           />
         </div>
         <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center space-y-4 sm:space-y-0 mb-6">

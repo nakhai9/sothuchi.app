@@ -24,11 +24,11 @@ export default function PageLayout({
           <div className='flex items-center gap-2'>
 
             <div className="flex flex-col justify-center">
-              <p className='font-bold'>{userInfo?.firstName} {userInfo?.lastName}</p>
+              <p className='font-bold'>{userInfo?.fullName}</p>
               <span className="text-xs">{userInfo?.email}</span>
             </div>
             <div className='border border-slate-200 rounded-full w-10 h-10'>
-
+              <img src={userInfo?.photoUrl} alt="Image" />
             </div>
           </div>
         </div>

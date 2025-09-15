@@ -4,6 +4,7 @@ import { SERVICES } from "@/services/service";
 import { useGlobalStore } from "@/store/globalStore";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -16,15 +17,16 @@ export default function SignUpPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await SERVICES.authService.signUp({
+      await SERVICES.AuthService.signUp({
         email,
         firstName,
         lastName,
         password,
       });
       router.push("/auth/sign-in");
+      toast.success("Created new a user");
     } catch (error) {
-      console.error(error);
+      toast.error("Cannot create new a user");
     } finally {
       setLoading(false);
     }

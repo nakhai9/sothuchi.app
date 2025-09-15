@@ -53,7 +53,7 @@ export default function Account() {
   const fetchAccounts = useCallback(async () => {
     setLoading(true);
     try {
-      const accounts = await SERVICES.accountService.getAll();
+      const accounts = await SERVICES.AccountService.getAll();
       if (accounts) {
         setAccounts(accounts);
         if (accounts.length > 0) {
@@ -71,7 +71,7 @@ export default function Account() {
     if (!id) return;
     setLoading(true);
     try {
-      await SERVICES.accountService.softDelete(id);
+      await SERVICES.AccountService.softDelete(id);
     } catch (error) {
       console.log(error);
     } finally {

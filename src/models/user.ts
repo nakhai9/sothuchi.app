@@ -1,9 +1,11 @@
+import { BaseEntity } from "./base";
+
 export type UserInfo = {
-  id: number;
-  lastName: string;
-  firstName: string;
   email: string;
-};
+  fullName: string;
+  phone?: string;
+  photoUrl?: string;
+} & BaseEntity;
 
 export type UserLogin = {
   email: string;

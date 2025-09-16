@@ -1,19 +1,11 @@
 "use client";
-import {
-  CirclePlus,
-  ReceiptText,
-  WalletMinimal,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { CirclePlus, ReceiptText, WalletMinimal } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-import { useModal } from '@/hooks';
+import { useModal } from "@/hooks";
 
-import {
-  Modal,
-  PageLayout,
-  TransactionForm,
-} from '../components';
-import { IconButton } from '../ui';
+import { Modal, PageLayout, TransactionForm } from "../components";
+import { IconButton } from "../ui";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -60,7 +52,11 @@ export default function Dashboard() {
   ];
 
   return (
-    <PageLayout title="Dashboard" description="Welcome to your Dashboard – an overview of your financial activities." actions={actions} >
+    <PageLayout
+      title="Dashboard"
+      description="Welcome to your Dashboard – an overview of your financial activities."
+      actions={actions}
+    >
       {/* Financial Overview Panels */}
       <div className="gap-6 grid grid-cols-1 md:grid-cols-3 mb-8">
         {/* Total Income Panel */}
@@ -94,8 +90,9 @@ export default function Dashboard() {
           <div>
             <p className="font-medium text-gray-600 text-sm">Total Balance</p>
             <p
-              className={`text-2xl font-bold ${totalBalance >= 0 ? "text-green-600" : "text-red-600"
-                }`}
+              className={`text-2xl font-bold ${
+                totalBalance >= 0 ? "text-green-600" : "text-red-600"
+              }`}
             >
               $
               {totalBalance.toLocaleString("en-US", {

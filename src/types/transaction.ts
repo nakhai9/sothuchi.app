@@ -3,7 +3,6 @@ export type TransactionModel = {
   amount: number;
   type: "income" | "expense";
   date: Date;
-  categoryId: number;
 };
 
 export type ReceiptTransaction = {

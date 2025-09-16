@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { Utils } from "@/lib/utils";
-import { AccountModel } from "@/models/account";
-import { BaseEntity, ResponseBase } from "@/models/base";
-import { CategoryModel } from "@/models/category";
-import { ReceiptTransaction, TransactionModel } from "@/models/transaction";
-import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/models/user";
+import { AccountModel } from "@/types/account";
+import { BaseEntity, ResponseBase } from "@/types/base";
+import { CategoryModel } from "@/types/category";
+import { ReceiptTransaction, TransactionModel } from "@/types/transaction";
+import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/types/user";
 
 import { httpService } from "./httpService";
 
@@ -17,7 +17,7 @@ const BASE_URLS = {
     signIn: "auth/sign-in",
     signUp: "auth/sign-up",
   },
-  user: "api/v1users",
+  user: "api/v1/users",
 };
 
 export const SERVICES = {

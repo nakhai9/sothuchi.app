@@ -1,32 +1,20 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-import clsx from 'clsx';
-import {
-  CirclePlus,
-  Trash,
-} from 'lucide-react';
+import clsx from "clsx";
+import { CirclePlus, Trash } from "lucide-react";
+import toast from "react-hot-toast";
 
-import { useModal } from '@/hooks';
-import { AccountModel } from '@/models/account';
-import { BaseEntity } from '@/models/base';
-import { SERVICES } from '@/services/service';
+import { useModal } from "@/hooks";
+import { Utils } from "@/lib/utils";
+import { SERVICES } from "@/services/service";
+import { useGlobalStore } from "@/store/globalStore";
+import { AccountModel } from "@/types/account";
+import { BaseEntity } from "@/types/base";
 
-import {
-  Modal,
-  PageLayout,
-} from '../components';
-import AccountForm from '../components/Forms/AccountForm';
-import {
-  DataGrid,
-  IconButton,
-} from '../ui';
-import { useGlobalStore } from '@/store/globalStore';
-import toast from 'react-hot-toast';
+import { Modal, PageLayout } from "../components";
+import AccountForm from "../components/Forms/AccountForm";
+import { DataGrid, IconButton } from "../ui";
 
 const columns = [
   { title: "Category", field: "categoryId" as const },
@@ -41,7 +29,7 @@ export default function Account() {
     (AccountModel & BaseEntity) | null
   >(null);
 
-  const setLoading = useGlobalStore(state => state.setLoading);
+  const setLoading = useGlobalStore((state) => state.setLoading);
 
   const handleOpenAccountModal = () => {
     modal.open();
@@ -56,7 +44,12 @@ export default function Account() {
     try {
       const accounts = await SERVICES.AccountService.getAll();
       if (accounts) {
-        setAccounts(accounts);
+        const mapped = accounts.map((x) => {
+          x.amountFormatted = Utils.currency.format(x.amount);
+          return x;
+        });
+
+        setAccounts(mapped);
         if (accounts.length > 0) {
           setSelectedAccount(accounts[0]);
         }
@@ -122,7 +115,7 @@ export default function Account() {
                   <div>
                     <p className="group-hover:text-white">{account.name}</p>
                     <span className="text-gray-700 group-hover:text-white text-lg">
-                      {account.amount}
+                      {account.amountFormatted}
                     </span>
                   </div>
                   <div>

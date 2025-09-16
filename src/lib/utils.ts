@@ -1,3 +1,5 @@
+import { upperFirst, words } from "lodash";
+
 export const Utils = {
   file: {
     convertFileToBase64: (file: File): Promise<string> => {
@@ -17,6 +19,12 @@ export const Utils = {
         style: "currency",
         currency: "VND",
       }).format(amount);
+    },
+  },
+  text: {
+    getInitial: (text: string) => {
+      const parts = words(text);
+      return parts.map((p) => upperFirst(p[0])).join("");
     },
   },
 };

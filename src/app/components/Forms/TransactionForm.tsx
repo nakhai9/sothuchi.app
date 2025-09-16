@@ -4,25 +4,28 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import z from "zod";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { DataGrid } from "@/app/ui";
 import { UseModalReturn } from "@/hooks/useModal";
-import { AccountModel } from "@/models/account";
-import { BaseEntity } from "@/models/base";
-import { CategoryModel } from "@/models/category";
-import { ReceiptTransaction } from "@/models/transaction";
 import { SERVICES } from "@/services/service";
 import { useGlobalStore } from "@/store/globalStore";
+import { DropdownOption } from "@/types/base";
+import { ReceiptTransaction } from "@/types/transaction";
 
 import FileUploadZone from "../FileUploadZone";
 
-type TransactionForm = {
-  amount: number;
-  date: Date;
-  description: string;
-  categoryId: number;
-  accountId: number;
-};
+const transactionSchema = z.object({
+  amount: z.number().min(1, "Amount is required"),
+  description: z.string().min(1, "Description is required"),
+  accountId: z.string().min(1, "Account is required"),
+  date: z.string().min(1, "Date is required"),
+});
+
+export type TransactionForm = z.infer<typeof transactionSchema>;
+
 type TransactionFormProps = {
   modal: UseModalReturn;
 };
@@ -35,29 +38,36 @@ const columns = [
 
 export default function TransactionForm({ modal }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
-  const [categories, setCategories] = useState<CategoryModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [accounts, setAccounts] = useState<(AccountModel & BaseEntity)[]>([]);
+  const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
   const [type, setType] = useState<"income" | "expense">("income");
   const userInfo = useGlobalStore((state) => state.userInfo);
   const [data, setData] = useState<ReceiptTransaction[]>([]);
-  const { register, handleSubmit } = useForm<TransactionForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<TransactionForm>({
+    resolver: zodResolver(transactionSchema),
     defaultValues: {
-      amount: 0,
+      amount: undefined,
+      description: "",
+      accountId: "",
+      date: "",
     },
   });
 
-  const setLoading = useGlobalStore(state => state.setLoading);
+  const setLoading = useGlobalStore((state) => state.setLoading);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const accounts = await SERVICES.AccountService.getAll();
-        if (accounts) setAccounts(accounts);
-
-        const categories = await SERVICES.CategoryService.getAll();
-        if (categories) setCategories(categories);
+        if (accounts)
+          setAccountOptions(
+            accounts.map((x) => ({ label: x.name, value: x.id as number }))
+          );
       } catch (error) {
         console.log(error);
       }
@@ -69,17 +79,15 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   const onSubmit: SubmitHandler<TransactionForm> = async (
     data: TransactionForm
   ) => {
+    console.log("munal transtaction", data);
+
     setLoading(true);
     try {
-      await SERVICES.TransactionService.create({
-        ...data,
-        type: type,
-      });
     } catch (error) {
       console.error(error);
     } finally {
       modal.close();
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -139,8 +147,13 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="number"
           id="amount"
           {...register("amount", { valueAsNumber: true })}
-          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.amount ? "border-red-500" : "border-slate-300"
+          }`}
         />
+        {errors.amount && (
+          <span className="text-red-500 text-xs">{errors.amount.message}</span>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <label
@@ -153,8 +166,15 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="text"
           id="description"
           {...register("description")}
-          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.description ? "border-red-500" : "border-slate-300"
+          }`}
         />
+        {errors.description && (
+          <span className="text-red-500 text-xs">
+            {errors.description.message}
+          </span>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <label
@@ -166,15 +186,17 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         <select
           id="accountId"
           {...register("accountId")}
-          className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.accountId ? "border-red-500" : "border-slate-300"
+          }`}
         >
-          <option value="" disabled selected hidden>
+          <option value="" disabled hidden>
             - Select -
           </option>
-          {accounts.length ? (
-            accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name}
+          {accountOptions.length ? (
+            accountOptions.map((x) => (
+              <option key={x.value} value={x.value}>
+                {x.label}
               </option>
             ))
           ) : (
@@ -183,30 +205,11 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
             </option>
           )}
         </select>
-      </div>
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="description"
-          className="block font-bold text-gray-800 text-sm"
-        >
-          Category
-        </label>
-        <select
-          id="categoryId"
-          {...register("categoryId")}
-          className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
-        >
-          <option value="" disabled selected hidden>
-            - Select -
-          </option>
-          {categories.length ? (
-            categories.map((cat) => <option key={cat.id}>{cat.name}</option>)
-          ) : (
-            <option key="other" value="0">
-              Other
-            </option>
-          )}
-        </select>
+        {errors.accountId && (
+          <span className="text-red-500 text-xs">
+            {errors.accountId.message}
+          </span>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="date" className="block font-bold text-gray-800 text-sm">
@@ -216,8 +219,13 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="date"
           id="date"
           {...register("date")}
-          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.date ? "border-red-500" : "border-slate-300"
+          }`}
         />
+        {errors.date && (
+          <span className="text-red-500 text-xs">{errors.date.message}</span>
+        )}
       </div>
 
       <div className="flex justify-end gap-3">
@@ -253,16 +261,18 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         </label>
         <select
           id="accountId"
-          {...register("accountId", { valueAsNumber: true })}
-          className="block px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+          {...register("accountId")}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.accountId ? "border-red-500" : "border-slate-300"
+          }`}
         >
-          <option value="" disabled selected hidden>
+          <option value="" disabled hidden>
             - Select -
           </option>
-          {accounts.length ? (
-            accounts.map((account) => (
-              <option key={account.id} value={account.id}>
-                {account.name}
+          {accountOptions.length ? (
+            accountOptions.map((x) => (
+              <option key={x.value} value={x.value}>
+                {x.label}
               </option>
             ))
           ) : (
@@ -271,6 +281,11 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
             </option>
           )}
         </select>
+        {errors.accountId && (
+          <span className="text-red-500 text-xs">
+            {errors.accountId.message}
+          </span>
+        )}
       </div>
       <div className="max-h-[400px] overflow-auto">
         <FileUploadZone

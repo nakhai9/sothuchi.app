@@ -1,31 +1,40 @@
 "use client";
 
-import { useState } from 'react';
+import { SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { z } from "zod";
 
-import {
-  SubmitHandler,
-  useForm,
-} from 'react-hook-form';
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { UseModalReturn } from '@/hooks/useModal';
-import { SERVICES } from '@/services/service';
-import { useGlobalStore } from '@/store/globalStore';
-import toast from 'react-hot-toast';
+import { UseModalReturn } from "@/hooks/useModal";
+import { SERVICES } from "@/services/service";
+import { useGlobalStore } from "@/store/globalStore";
 
-type AccountForm = {
-  name: string;
-  amount: number;
-};
+const accountSchema = z.object({
+  name: z.string().nonempty("Name is required"),
+  amount: z.coerce.number().positive("Amount must be greater than 0"),
+});
+
+type AccountForm = z.infer<typeof accountSchema>;
 
 type AccountFormProps = {
   modal: UseModalReturn;
   onSuccess?: () => void;
 };
 export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<AccountForm>();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    resolver: zodResolver(accountSchema),
+    defaultValues: { name: "", amount: 0 },
+    mode: "onTouched",
+  });
 
   const userInfo = useGlobalStore((state) => state.userInfo);
-  const setLoading = useGlobalStore(state => state.setLoading);
+  const setLoading = useGlobalStore((state) => state.setLoading);
   const onSubmit: SubmitHandler<AccountForm> = async (data: AccountForm) => {
     setLoading(true);
     try {
@@ -35,6 +44,7 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
     } catch (error) {
       toast.error("Failed to create account");
     } finally {
+      reset();
       setLoading(false);
       modal?.close();
       toast.success("Account created successfully");
@@ -54,6 +64,9 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
           {...register("name")}
           className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
+        {errors.name && (
+          <p className="text-red-500 text-xs">{errors.name.message}</p>
+        )}
       </div>
       <div className="flex flex-col gap-1">
         <label
@@ -68,6 +81,9 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
           {...register("amount", { valueAsNumber: true })}
           className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
         />
+        {errors.amount && (
+          <p className="text-red-500 text-xs">{errors.amount.message}</p>
+        )}
       </div>
       <div className="flex justify-end gap-3">
         <button

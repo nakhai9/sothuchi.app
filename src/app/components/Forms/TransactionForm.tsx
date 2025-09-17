@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import clsx from "clsx";
 import { TrendingDown, TrendingUp } from "lucide-react";
@@ -63,11 +63,9 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const accounts = await SERVICES.AccountService.getAll();
+        const accounts = await SERVICES.LookupService.getAccounts();
         if (accounts)
-          setAccountOptions(
-            accounts.map((x) => ({ label: x.name, value: x.id as number }))
-          );
+          setAccountOptions(accounts);
       } catch (error) {
         console.log(error);
       }
@@ -147,9 +145,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="number"
           id="amount"
           {...register("amount", { valueAsNumber: true })}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.amount ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.amount ? "border-red-500" : "border-slate-300"
+            }`}
         />
         {errors.amount && (
           <span className="text-red-500 text-xs">{errors.amount.message}</span>
@@ -166,9 +163,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="text"
           id="description"
           {...register("description")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.description ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.description ? "border-red-500" : "border-slate-300"
+            }`}
         />
         {errors.description && (
           <span className="text-red-500 text-xs">
@@ -186,9 +182,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.accountId ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
+            }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -219,9 +214,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           type="date"
           id="date"
           {...register("date")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.date ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.date ? "border-red-500" : "border-slate-300"
+            }`}
         />
         {errors.date && (
           <span className="text-red-500 text-xs">{errors.date.message}</span>
@@ -262,9 +256,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.accountId ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
+            }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -344,7 +337,8 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
           From bill image
         </button>
       </div>
-      {mode === "manual" ? <ManualForm /> : <BillForm />}
+      {/* {mode === "manual" ? <ManualForm /> : <BillForm />} */}
+      <ManualForm />
     </div>
   );
 }

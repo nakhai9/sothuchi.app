@@ -2,22 +2,25 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { Utils } from "@/lib/utils";
 import { AccountModel } from "@/types/account";
-import { BaseEntity, ResponseBase } from "@/types/base";
+import { BaseEntity, DropdownOption, ResponseBase } from "@/types/base";
 import { CategoryModel } from "@/types/category";
 import { ReceiptTransaction, TransactionModel } from "@/types/transaction";
 import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/types/user";
 
-import { httpService } from "./httpService";
+import { httpService } from "../lib/config/httpService";
+
+const API_PREFIX = "api/v1";
 
 const BASE_URLS = {
-  categories: "api/v1/categories",
-  transactions: "api/v1/transactions",
-  accounts: "api/v1/accounts",
+  categories: `${API_PREFIX}/categories`,
+  transactions: `${API_PREFIX}/transactions`,
+  accounts: `${API_PREFIX}/accounts`,
   auth: {
-    signIn: "auth/sign-in",
-    signUp: "auth/sign-up",
+    signIn: `auth/sign-in`,
+    signUp: `auth/sign-up`,
   },
-  user: "api/v1/users",
+  user: `${API_PREFIX}/users`,
+  lookup: `${API_PREFIX}/lookup`,
 };
 
 export const SERVICES = {
@@ -37,11 +40,17 @@ export const SERVICES = {
 
   // Transaction Service
   TransactionService: {
-    getAll: async (): Promise<CategoryModel[] | undefined> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    getAll: async (params: any): Promise<TransactionModel[] | undefined> => {
       try {
-        const { data } = await httpService.get<ResponseBase<CategoryModel[]>>(
-          BASE_URLS.transactions
-        );
+        let url = `${BASE_URLS.transactions}`;
+        if (params) {
+          const queryString = new URLSearchParams(params).toString();
+          url = `${url}?${queryString}`;
+        }
+        const { data } = await httpService.get<
+          ResponseBase<TransactionModel[]>
+        >(url);
         return data;
       } catch (error) {
         console.log(error);
@@ -173,6 +182,19 @@ export const SERVICES = {
       try {
         const { data } = await httpService.get<ResponseBase<UserInfo>>(
           `${BASE_URLS.user}/me`
+        );
+        return data;
+      } catch (error) {
+        throw error;
+      }
+    },
+  },
+
+  LookupService: {
+    getAccounts: async (): Promise<DropdownOption[]> => {
+      try {
+        const { data } = await httpService.get<ResponseBase<DropdownOption[]>>(
+          `${BASE_URLS.lookup}/accounts`
         );
         return data;
       } catch (error) {

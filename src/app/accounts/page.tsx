@@ -15,11 +15,14 @@ import { BaseEntity } from "@/types/base";
 import { Modal, PageLayout } from "../components";
 import AccountForm from "../components/Forms/AccountForm";
 import { DataGrid, IconButton } from "../ui";
+import { TransactionModel } from "@/types/transaction";
 
 const columns = [
-  { title: "Category", field: "categoryId" as const },
   { title: "Description", field: "description" as const },
-  { title: "Amount", field: "amount" as const },
+  {
+    title: "Amount", field: "amountFormatted" as const,
+    cellRender: (row: TransactionModel) => (<div className={clsx(row.type === 'expense' ? 'text-red-600' : 'text-green-600')}>{row.amountFormatted}</div>)
+  },
 ];
 
 export default function Account() {
@@ -28,6 +31,7 @@ export default function Account() {
   const [selectedAccount, setSelectedAccount] = useState<
     (AccountModel & BaseEntity) | null
   >(null);
+  const [transactions, setTransactions] = useState<TransactionModel[]>([]);
 
   const setLoading = useGlobalStore((state) => state.setLoading);
 
@@ -48,10 +52,9 @@ export default function Account() {
           x.amountFormatted = Utils.currency.format(x.amount);
           return x;
         });
-
         setAccounts(mapped);
         if (accounts.length > 0) {
-          setSelectedAccount(accounts[0]);
+          setSelectedAccount(mapped[0]);
         }
       }
     } catch (error) {
@@ -60,6 +63,38 @@ export default function Account() {
       setLoading(false);
     }
   }, []);
+
+  const fetchTransactionsByAccountId = useCallback(
+    async (accountId: number) => {
+      setLoading(true);
+      try {
+        const response = await SERVICES.TransactionService.getAll({ accountId });
+        if (response) {
+          const mapped = response.map((tx: TransactionModel) => ({
+            ...tx,
+            amountFormatted: Utils.currency.format(tx.amount),
+          }));
+          setTransactions(mapped);
+        }
+      } catch (error) {
+        toast.error("Failed to fetch transactions");
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
+
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
+
+  useEffect(() => {
+    if (selectedAccount?.id) {
+      fetchTransactionsByAccountId(selectedAccount.id);
+    }
+  }, [selectedAccount, fetchTransactionsByAccountId]);
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
@@ -138,7 +173,7 @@ export default function Account() {
           <h5 className="mb-2 font-medium text-gray-700 text-lg">
             Transaction History
           </h5>
-          <DataGrid columns={columns} data={[]} />
+          <DataGrid columns={columns} data={transactions} />
         </div>
       </div>
 

@@ -12,17 +12,50 @@ import {
   DataGrid,
   IconButton,
 } from '../ui';
+import { useEffect, useState } from 'react';
+import { useGlobalStore } from '@/store/globalStore';
+import { TransactionModel } from '@/types/transaction';
+import toast from 'react-hot-toast';
+import { SERVICES } from '@/services/service';
+import { Utils } from '@/lib/utils';
+import clsx from 'clsx';
 
-const columns = [{ title: "Description", field: "description" as const }];
-
-const data = [
+const columns = [
+  { title: "Description", field: "description" as const },
   {
-    description: "hello",
+    title: "Amount", field: "amountFormatted" as const,
+    cellRender: (row: TransactionModel) => (<div className={clsx(row.type === 'expense' ? 'text-red-600' : 'text-green-600')}>{row.amountFormatted}</div>)
   },
 ];
+
 export default function Transactions() {
 
+  const [transactions, setTransactions] = useState<TransactionModel[]>([]);
+  const setLoading = useGlobalStore(state => state.setLoading);
+
   const modal = useModal();
+
+  useEffect(() => {
+    const fetchData = async () => {
+
+      setLoading(true)
+      try {
+        const transactions = await SERVICES.TransactionService.getAll();
+        if (transactions) {
+          setTransactions(transactions.map(x => {
+            x.amountFormatted = Utils.currency.format(x.amount)
+            return x;
+          }))
+        }
+      } catch (error) {
+        toast.error('Something went wrong')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [setLoading])
 
   const handleOpenAccountModal = () => {
     modal.open()
@@ -41,7 +74,7 @@ export default function Transactions() {
   return (
     <PageLayout title="Transactions" description='Manage your daily spending by adding, editing, and tracking transactions here.' actions={actions}>
 
-      <DataGrid columns={columns} data={data} />
+      <DataGrid columns={columns} data={transactions} />
 
       <Modal
         isOpen={modal.isOpen}

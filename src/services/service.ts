@@ -41,7 +41,7 @@ export const SERVICES = {
   // Transaction Service
   TransactionService: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getAll: async (params: any): Promise<TransactionModel[] | undefined> => {
+    getAll: async (params?: any): Promise<TransactionModel[] | undefined> => {
       try {
         let url = `${BASE_URLS.transactions}`;
         if (params) {

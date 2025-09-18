@@ -3,6 +3,8 @@ export type TransactionModel = {
   amount: number;
   type: "income" | "expense";
   amountFormatted?: string;
+  accountId: number;
+  paidAt: Date;
 };
 
 export type ReceiptTransaction = {

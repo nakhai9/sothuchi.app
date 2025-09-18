@@ -16,18 +16,20 @@ import { DropdownOption } from "@/types/base";
 import { ReceiptTransaction } from "@/types/transaction";
 
 import FileUploadZone from "../FileUploadZone";
+import toast from "react-hot-toast";
 
 const transactionSchema = z.object({
   amount: z.number().min(1, "Amount is required"),
   description: z.string().min(1, "Description is required"),
   accountId: z.string().min(1, "Account is required"),
-  date: z.string().min(1, "Date is required"),
+  paidAt: z.string().min(1, "Date is required"),
 });
 
-export type TransactionForm = z.infer<typeof transactionSchema>;
+export type TransactionFormData = z.infer<typeof transactionSchema>;
 
 type TransactionFormProps = {
   modal: UseModalReturn;
+  onSuccess?: () => void;
 };
 
 const columns = [
@@ -36,25 +38,24 @@ const columns = [
   { title: "Date", field: "date" as const },
 ];
 
-export default function TransactionForm({ modal }: TransactionFormProps) {
+export default function TransactionForm({ modal, onSuccess }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
   const [type, setType] = useState<"income" | "expense">("income");
-  const userInfo = useGlobalStore((state) => state.userInfo);
   const [data, setData] = useState<ReceiptTransaction[]>([]);
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TransactionForm>({
+  } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       amount: undefined,
       description: "",
       accountId: "",
-      date: "",
+      paidAt: "",
     },
   });
 
@@ -74,18 +75,25 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
     fetchData();
   }, []);
 
-  const onSubmit: SubmitHandler<TransactionForm> = async (
-    data: TransactionForm
+  const onSubmit: SubmitHandler<TransactionFormData> = async (
+    data: TransactionFormData
   ) => {
-    console.log("munal transtaction", data);
-
     setLoading(true);
     try {
+      await SERVICES.TransactionService.create({
+        accountId: Number(data.accountId),
+        amount: data.amount,
+        description: data.description,
+        paidAt: new Date(data.paidAt),
+        type: type
+      })
+      toast.success("Created successfully");
     } catch (error) {
-      console.error(error);
+      toast.error("Something went wrong");
     } finally {
       modal.close();
       setLoading(false);
+      onSuccess?.();
     }
   };
 
@@ -208,17 +216,17 @@ export default function TransactionForm({ modal }: TransactionFormProps) {
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="date" className="block font-bold text-gray-800 text-sm">
-          Date
+          Paid at
         </label>
         <input
           type="date"
           id="date"
-          {...register("date")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.date ? "border-red-500" : "border-slate-300"
+          {...register("paidAt")}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.paidAt ? "border-red-500" : "border-slate-300"
             }`}
         />
-        {errors.date && (
-          <span className="text-red-500 text-xs">{errors.date.message}</span>
+        {errors.paidAt && (
+          <span className="text-red-500 text-xs">{errors.paidAt.message}</span>
         )}
       </div>
 

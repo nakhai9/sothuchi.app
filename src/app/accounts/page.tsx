@@ -12,7 +12,7 @@ import { useGlobalStore } from "@/store/globalStore";
 import { AccountModel } from "@/types/account";
 import { BaseEntity } from "@/types/base";
 
-import { Modal, PageLayout } from "../components";
+import { Modal, PageLayout, TransactionForm } from "../components";
 import AccountForm from "../components/Forms/AccountForm";
 import { DataGrid, IconButton } from "../ui";
 import { TransactionModel } from "@/types/transaction";
@@ -33,9 +33,11 @@ export default function Account() {
   >(null);
   const [transactions, setTransactions] = useState<TransactionModel[]>([]);
 
+  const [hasTransactionModal, setHasTransactionModal] = useState<boolean>(false);
+
   const setLoading = useGlobalStore((state) => state.setLoading);
 
-  const handleOpenAccountModal = () => {
+  const handleOpenModal = () => {
     modal.open();
   };
 
@@ -43,58 +45,40 @@ export default function Account() {
     setSelectedAccount(account);
   };
 
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccountsAndTransactions = useCallback(async () => {
     setLoading(true);
     try {
-      const accounts = await SERVICES.AccountService.getAll();
-      if (accounts) {
-        const mapped = accounts.map((x) => {
-          x.amountFormatted = Utils.currency.format(x.amount);
-          return x;
-        });
+      const accountList = await SERVICES.AccountService.getAll();
+      if (accountList && accountList?.length > 0) {
+        const mapped = accounts.map((x) => ({
+          ...x,
+          amountFormatted: Utils.currency.format(x.amount),
+        }));
         setAccounts(mapped);
-        if (accounts.length > 0) {
-          setSelectedAccount(mapped[0]);
+
+        const first = mapped[0];
+        setSelectedAccount(first);
+
+        const response = await SERVICES.TransactionService.getAll({ accountId: first.id });
+        if (response) {
+          const mappedTx = response.map((tx: TransactionModel) => ({
+            ...tx,
+            amountFormatted: Utils.currency.format(tx.amount),
+          }));
+          setTransactions(mappedTx);
         }
       }
     } catch (error) {
-      toast.error("Failed to fetch accounts");
+      toast.error("Failed to fetch data");
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const fetchTransactionsByAccountId = useCallback(
-    async (accountId: number) => {
-      setLoading(true);
-      try {
-        const response = await SERVICES.TransactionService.getAll({ accountId });
-        if (response) {
-          const mapped = response.map((tx: TransactionModel) => ({
-            ...tx,
-            amountFormatted: Utils.currency.format(tx.amount),
-          }));
-          setTransactions(mapped);
-        }
-      } catch (error) {
-        toast.error("Failed to fetch transactions");
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-
   useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
+    fetchAccountsAndTransactions();
+  }, [fetchAccountsAndTransactions]);
 
-  useEffect(() => {
-    if (selectedAccount?.id) {
-      fetchTransactionsByAccountId(selectedAccount.id);
-    }
-  }, [selectedAccount, fetchTransactionsByAccountId]);
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
@@ -106,20 +90,16 @@ export default function Account() {
     } finally {
       setLoading(false);
       toast.success("Account deleted successfully");
-      fetchAccounts();
+      fetchAccountsAndTransactions();
     }
   };
-
-  useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
 
   const actions = [
     <IconButton
       type="button"
       key="add-transaction"
       icon={<CirclePlus size={20} />}
-      onClick={handleOpenAccountModal}
+      onClick={handleOpenModal}
       size="md"
       title="Add transaction"
     />,
@@ -170,16 +150,23 @@ export default function Account() {
           </div>
         </div>
         <div className="flex-1 bg-white shadow-lg p-4 rounded-md">
-          <h5 className="mb-2 font-medium text-gray-700 text-lg">
-            Transaction History
-          </h5>
+          <div className="flex justify-between items-center mb-2">
+            <h5 className="font-medium text-gray-700 text-lg">
+              Transaction History
+            </h5>
+            <button type="button" onClick={handleOpenModal} className="bg-slate-100 hover:bg-slate-50 px-4 py-2 border border-slate-300 rounded font-medium text-sm cursor-pointer">Add new transaction</button>
+          </div>
           <DataGrid columns={columns} data={transactions} />
         </div>
       </div>
 
-      <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
-        <AccountForm modal={modal} onSuccess={fetchAccounts} />
-      </Modal>
+      {
+        hasTransactionModal ? (<Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
+          <AccountForm modal={modal} onSuccess={fetchAccountsAndTransactions} />
+        </Modal>) : (<Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Transaction">
+          <TransactionForm modal={modal} onSuccess={fetchAccountsAndTransactions} />
+        </Modal>)
+      }
     </PageLayout>
   );
 }

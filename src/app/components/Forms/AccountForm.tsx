@@ -15,7 +15,7 @@ const accountSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than 0"),
 });
 
-type AccountForm = z.infer<typeof accountSchema>;
+type AccountFormData = z.infer<typeof accountSchema>;
 
 type AccountFormProps = {
   modal: UseModalReturn;
@@ -35,7 +35,8 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
 
   const userInfo = useGlobalStore((state) => state.userInfo);
   const setLoading = useGlobalStore((state) => state.setLoading);
-  const onSubmit: SubmitHandler<AccountForm> = async (data: AccountForm) => {
+
+  const onSubmit: SubmitHandler<AccountFormData> = async (data: AccountFormData) => {
     setLoading(true);
     try {
       await SERVICES.AccountService.create({

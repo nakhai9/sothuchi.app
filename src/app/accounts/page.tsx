@@ -1,27 +1,50 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 
-import clsx from "clsx";
-import { CirclePlus, Trash } from "lucide-react";
-import toast from "react-hot-toast";
+import clsx from 'clsx';
+import {
+  CirclePlus,
+  Trash,
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
-import { useModal } from "@/hooks";
-import { Utils } from "@/lib/utils";
-import { SERVICES } from "@/services/service";
-import { useGlobalStore } from "@/store/globalStore";
-import { AccountModel } from "@/types/account";
-import { BaseEntity } from "@/types/base";
+import { useModal } from '@/hooks';
+import { Utils } from '@/lib/utils';
+import { SERVICES } from '@/services/service';
+import { useGlobalStore } from '@/store/globalStore';
+import { AccountModel } from '@/types/account';
+import { BaseEntity } from '@/types/base';
+import { TransactionModel } from '@/types/transaction';
 
-import { Modal, PageLayout, TransactionForm } from "../components";
-import AccountForm from "../components/Forms/AccountForm";
-import { DataGrid, IconButton } from "../ui";
-import { TransactionModel } from "@/types/transaction";
+import {
+  Modal,
+  PageLayout,
+  TransactionForm,
+} from '../components';
+import AccountForm from '../components/Forms/AccountForm';
+import {
+  DataGrid,
+  IconButton,
+} from '../ui';
 
 const columns = [
   { title: "Description", field: "description" as const },
   {
-    title: "Amount", field: "amountFormatted" as const,
-    cellRender: (row: TransactionModel) => (<div className={clsx(row.type === 'expense' ? 'text-red-600' : 'text-green-600')}>{row.amountFormatted}</div>)
+    title: "Amount",
+    field: "amountFormatted" as const,
+    cellRender: (row: TransactionModel) => (
+      <div
+        className={clsx(
+          row.type === "expense" ? "text-red-600" : "text-green-600"
+        )}
+      >
+        {row.amountFormatted}
+      </div>
+    ),
   },
 ];
 
@@ -33,7 +56,8 @@ export default function Account() {
   >(null);
   const [transactions, setTransactions] = useState<TransactionModel[]>([]);
 
-  const [hasTransactionModal, setHasTransactionModal] = useState<boolean>(false);
+  const [hasTransactionModal, setHasTransactionModal] =
+    useState<boolean>(false);
 
   const setLoading = useGlobalStore((state) => state.setLoading);
 
@@ -59,7 +83,9 @@ export default function Account() {
         const first = mapped[0];
         setSelectedAccount(first);
 
-        const response = await SERVICES.TransactionService.getAll({ accountId: first.id });
+        const response = await SERVICES.TransactionService.getAll({
+          accountId: first.id,
+        });
         if (response) {
           const mappedTx = response.map((tx: TransactionModel) => ({
             ...tx,
@@ -78,7 +104,6 @@ export default function Account() {
   useEffect(() => {
     fetchAccountsAndTransactions();
   }, [fetchAccountsAndTransactions]);
-
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
@@ -154,19 +179,38 @@ export default function Account() {
             <h5 className="font-medium text-gray-700 text-lg">
               Transaction History
             </h5>
-            <button type="button" onClick={handleOpenModal} className="bg-slate-100 hover:bg-slate-50 px-4 py-2 border border-slate-300 rounded font-medium text-sm cursor-pointer">Add new transaction</button>
+            {accounts.length > 0 && (
+              <button
+                type="button"
+                onClick={handleOpenModal}
+                className="bg-slate-100 hover:bg-slate-50 px-4 py-2 border border-slate-300 rounded font-medium text-sm cursor-pointer"
+              >
+                Add new transaction
+              </button>
+            )}
           </div>
-          <DataGrid columns={columns} data={transactions} />
+          {accounts.length > 0 && (
+            <DataGrid columns={columns} data={transactions} />
+          )}
         </div>
       </div>
 
-      {
-        hasTransactionModal ? (<Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
+      {hasTransactionModal ? (
+        <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
           <AccountForm modal={modal} onSuccess={fetchAccountsAndTransactions} />
-        </Modal>) : (<Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Transaction">
-          <TransactionForm modal={modal} onSuccess={fetchAccountsAndTransactions} />
-        </Modal>)
-      }
+        </Modal>
+      ) : (
+        <Modal
+          isOpen={modal.isOpen}
+          onClose={modal.close}
+          title="Add Transaction"
+        >
+          <TransactionForm
+            modal={modal}
+            onSuccess={fetchAccountsAndTransactions}
+          />
+        </Modal>
+      )}
     </PageLayout>
   );
 }

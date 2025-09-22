@@ -61,37 +61,60 @@ export default function Account() {
 
   const setLoading = useGlobalStore((state) => state.setLoading);
 
-  const handleOpenModal = () => {
+  const handleOpenModal = (modalName: string) => {
+    if (modalName === 'transaction') {
+      setHasTransactionModal(true);
+    }
     modal.open();
   };
 
-  const setAccount = (account: AccountModel & BaseEntity) => {
+  const setAccount = async (account: AccountModel & BaseEntity) => {
     setSelectedAccount(account);
+    setLoading(true);
+    try {
+      const response = await SERVICES.TransactionService.getAll({
+        accountId: account.id,
+      });
+      if (response) {
+        const mappedTx = response.map((tx: TransactionModel) => ({
+          ...tx,
+          amountFormatted: Utils.currency.format(tx.amount),
+        }));
+        setTransactions(mappedTx);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch transactions");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchAccountsAndTransactions = useCallback(async () => {
     setLoading(true);
     try {
       const accountList = await SERVICES.AccountService.getAll();
-      if (accountList && accountList?.length > 0) {
-        const mapped = accounts.map((x) => ({
+      if (accountList) {
+        const mapped = accountList.map((x) => ({
           ...x,
           amountFormatted: Utils.currency.format(x.amount),
         }));
+
         setAccounts(mapped);
 
-        const first = mapped[0];
-        setSelectedAccount(first);
+        if (accountList.length > 0) {
+          const first = mapped[0];
+          setSelectedAccount(first);
 
-        const response = await SERVICES.TransactionService.getAll({
-          accountId: first.id,
-        });
-        if (response) {
-          const mappedTx = response.map((tx: TransactionModel) => ({
-            ...tx,
-            amountFormatted: Utils.currency.format(tx.amount),
-          }));
-          setTransactions(mappedTx);
+          const response = await SERVICES.TransactionService.getAll({
+            accountId: first.id,
+          });
+          if (response) {
+            const mappedTx = response.map((tx: TransactionModel) => ({
+              ...tx,
+              amountFormatted: Utils.currency.format(tx.amount),
+            }));
+            setTransactions(mappedTx);
+          }
         }
       }
     } catch (error) {
@@ -124,7 +147,7 @@ export default function Account() {
       type="button"
       key="add-transaction"
       icon={<CirclePlus size={20} />}
-      onClick={handleOpenModal}
+      onClick={() => handleOpenModal('account')}
       size="md"
       title="Add transaction"
     />,
@@ -138,17 +161,17 @@ export default function Account() {
     >
       <div className="flex md:flex-row flex-col gap-4 md:gap-8">
         <div className="flex flex-col bg-white shadow-lg rounded-md w-full md:w-80 h-80">
-          <div className="px-4 py-2 border border-slate-100 font-bold text-gray-600 text-lg">
+          <div className="px-4 py-2 border border-slate-100 font-medium text-gray-600 text-lg">
             Your accounts
           </div>
-          <div className="overflow-auto">
+          <div className="flex flex-col overflow-auto">
             {accounts.length ? (
               accounts.map((account) => (
                 <div
                   key={account.id}
                   onClick={() => setAccount(account)}
                   className={clsx(
-                    `group flex justify-between items-center hover:bg-amber-400 px-4 py-2`,
+                    `group flex justify-between items-center hover:bg-amber-400 px-4 py-2 cursor-pointer`,
                     account.id === selectedAccount?.id && "bg-amber-500"
                   )}
                 >
@@ -170,32 +193,37 @@ export default function Account() {
                 </div>
               ))
             ) : (
-              <span className="text-gray-500">No data</span>
+              <div className="p-4 text-gray-500 text-center">No data</div>
             )}
           </div>
         </div>
-        <div className="flex-1 bg-white shadow-lg p-4 rounded-md">
-          <div className="flex justify-between items-center mb-2">
-            <h5 className="font-medium text-gray-700 text-lg">
+        <div className="flex flex-col flex-1 bg-white shadow-lg rounded-md">
+          <div className="flex justify-between items-center border border-slate-100">
+            <h5 className="px-4 py-2 font-medium text-gray-700 text-lg">
               Transaction History
             </h5>
             {accounts.length > 0 && (
               <button
                 type="button"
-                onClick={handleOpenModal}
+                onClick={() => handleOpenModal('transaction')}
                 className="bg-slate-100 hover:bg-slate-50 px-4 py-2 border border-slate-300 rounded font-medium text-sm cursor-pointer"
               >
                 Add new transaction
               </button>
             )}
           </div>
-          {accounts.length > 0 && (
-            <DataGrid columns={columns} data={transactions} />
-          )}
+          <div className='flex-1 bg-red-50 p-4'>
+            g
+            {accounts.length > 0 && (
+              <DataGrid columns={columns} data={transactions} />
+            )}
+          </div>
         </div>
       </div>
 
-      {hasTransactionModal ? (
+
+      {/* Modal */}
+      {!hasTransactionModal ? (
         <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
           <AccountForm modal={modal} onSuccess={fetchAccountsAndTransactions} />
         </Modal>

@@ -128,7 +128,8 @@ export default function Account() {
   }
 
   const onTransactionSubmitSuccess = async () => {
-    console.log("update transaction")
+    if (!selectedAccount?.id) return;
+    await fetchTransactionsByAccountId(selectedAccount.id)
   }
 
   const deleteAccount = async (id: number | undefined) => {

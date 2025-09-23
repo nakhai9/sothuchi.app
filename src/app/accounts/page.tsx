@@ -46,25 +46,30 @@ const columns = [
       </div>
     ),
   },
+  {
+    title: "Paid at",
+    field: 'paidAt' as const,
+  }
 ];
+
+enum ModalName {
+  Account = 'account',
+  Transaction = 'transaction'
+}
 
 export default function Account() {
   const modal = useModal();
+  const [modalName, setModalName] = useState<ModalName | null>(null);
   const [accounts, setAccounts] = useState<(AccountModel & BaseEntity)[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<
     (AccountModel & BaseEntity) | null
   >(null);
   const [transactions, setTransactions] = useState<TransactionModel[]>([]);
 
-  const [hasTransactionModal, setHasTransactionModal] =
-    useState<boolean>(false);
-
   const setLoading = useGlobalStore((state) => state.setLoading);
 
-  const handleOpenModal = (modalName: string) => {
-    if (modalName === 'transaction') {
-      setHasTransactionModal(true);
-    }
+  const handleOpenModal = (name: ModalName) => {
+    setModalName(name);
     modal.open();
   };
 
@@ -73,9 +78,6 @@ export default function Account() {
     try {
 
       const accounts = await SERVICES.AccountService.getAll();
-
-
-      console.log(accounts)
 
       const mappedAccounts = accounts?.map(a => ({
         ...a,
@@ -87,6 +89,9 @@ export default function Account() {
       if (mappedAccounts.length > 0) {
         const first = mappedAccounts[0];
         setSelectedAccount(first);
+        if (first?.id) {
+          await fetchTransactionsByAccountId(first.id);
+        }
       }
     } catch (error) {
       toast.error("Failed to fetch accounts");
@@ -95,7 +100,7 @@ export default function Account() {
     }
   }, []);
 
-  const fetchTransactionsByAccountId = useCallback(async (accountId: number) => {
+  const fetchTransactionsByAccountId = async (accountId: number) => {
     try {
       const transactions = await SERVICES.TransactionService.getAll({
         accountId: accountId
@@ -111,36 +116,20 @@ export default function Account() {
     } catch (error) {
       console.log(error);
     }
-  }, [])
+  }
 
   useEffect(() => {
     fetchAccounts();
   }, [fetchAccounts]);
 
-  useEffect(() => {
-    if (selectedAccount?.id) {
-      fetchTransactionsByAccountId(selectedAccount.id);
-    }
-  }, [selectedAccount]);
-
-
 
   const onAccountSubmitSuccess = () => {
-    console.log("account");
     fetchAccounts();
-
   }
 
   const onTransactionSubmitSuccess = async () => {
-    if (!selectedAccount?.id) return;
-    console.log("hello");
-
-
-    if (selectedAccount?.id) {
-      await fetchTransactionsByAccountId(selectedAccount?.id)
-    }
+    console.log("update transaction")
   }
-
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
@@ -151,19 +140,25 @@ export default function Account() {
       toast.error("Failed to delete account");
     } finally {
       setLoading(false);
+      await fetchAccounts();
       toast.success("Account deleted successfully");
-
     }
   };
+
+  const selectAccount = (account: AccountModel & BaseEntity) => {
+    if (!account?.id) return;
+    setSelectedAccount(account);
+    fetchTransactionsByAccountId(account.id);
+  }
 
   const actions = [
     <IconButton
       type="button"
-      key="add-transaction"
+      key="add-account"
       icon={<CirclePlus size={20} />}
-      onClick={() => handleOpenModal('account')}
+      onClick={() => handleOpenModal(ModalName.Account)}
       size="md"
-      title="Add transaction"
+      title="Add account"
     />,
   ];
 
@@ -183,9 +178,9 @@ export default function Account() {
               accounts.map((account) => (
                 <div
                   key={account.id}
-                  onClick={() => setSelectedAccount(account)}
+                  onClick={() => selectAccount(account)}
                   className={clsx(
-                    `group flex justify-between items-center hover:bg-amber-400 px-4 py-2 cursor-pointer`,
+                    `group flex justify-between items-center hover:bg-amber-400 px-4 py-2 border-slate-200 border-b cursor-pointer`,
                     account.id === selectedAccount?.id && "bg-amber-500"
                   )}
                 >
@@ -219,7 +214,7 @@ export default function Account() {
             {accounts.length > 0 && (
               <button
                 type="button"
-                onClick={() => handleOpenModal('transaction')}
+                onClick={() => handleOpenModal(ModalName.Transaction)}
                 className="bg-slate-100 hover:bg-slate-50 px-4 py-1 border border-slate-300 rounded font-medium text-sm cursor-pointer"
               >
                 Add new transaction
@@ -236,22 +231,21 @@ export default function Account() {
 
 
       {/* Modal */}
-      {!hasTransactionModal ? (
-        <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
-          <AccountForm modal={modal} onSuccess={onAccountSubmitSuccess} />
-        </Modal>
-      ) : (
-        <Modal
-          isOpen={modal.isOpen}
-          onClose={modal.close}
-          title="Add Transaction"
-        >
-          <TransactionForm
-            modal={modal}
-            onSuccess={onTransactionSubmitSuccess}
-          />
-        </Modal>
-      )}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={modal.close}
+        title={modalName === ModalName.Transaction ? 'Add Transaction' : 'Add Account'}
+      >
+        {
+          modalName === ModalName.Account ?
+            <AccountForm modal={modal} onSuccess={onAccountSubmitSuccess} />
+            : <TransactionForm
+              modal={modal}
+              onSuccess={onTransactionSubmitSuccess}
+            />
+        }
+      </Modal>
+
     </PageLayout>
   );
 }

@@ -43,7 +43,7 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
-  const [type, setType] = useState<"income" | "expense">("income");
+  const [type, setType] = useState<"income" | "expense">("expense");
   const [data, setData] = useState<ReceiptTransaction[]>([]);
   const {
     register,
@@ -119,23 +119,23 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
         type="button"
         className={clsx(
           `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
-          type === "income" ? "bg-amber-200" : ""
-        )}
-        onClick={() => setType("income")}
-      >
-        <TrendingDown size={14} />
-        Income
-      </button>
-      <button
-        type="button"
-        className={clsx(
-          `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
           type === "expense" ? "bg-amber-200" : ""
         )}
         onClick={() => setType("expense")}
       >
         <TrendingUp size={14} />
         Expense
+      </button>
+      <button
+        type="button"
+        className={clsx(
+          `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
+          type === "income" ? "bg-amber-200" : ""
+        )}
+        onClick={() => setType("income")}
+      >
+        <TrendingDown size={14} />
+        Income
       </button>
     </div>
   );

@@ -68,65 +68,79 @@ export default function Account() {
     modal.open();
   };
 
-  const setAccount = async (account: AccountModel & BaseEntity) => {
-    setSelectedAccount(account);
+  const fetchAccounts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await SERVICES.TransactionService.getAll({
-        accountId: account.id,
-      });
-      if (response) {
-        const mappedTx = response.map((tx: TransactionModel) => ({
-          ...tx,
-          amountFormatted: Utils.currency.format(tx.amount),
-        }));
-        setTransactions(mappedTx);
+
+      const accounts = await SERVICES.AccountService.getAll();
+
+
+      console.log(accounts)
+
+      const mappedAccounts = accounts?.map(a => ({
+        ...a,
+        amountFormatted: Utils.currency.format(a.amount)
+      })) ?? [];
+
+      setAccounts(mappedAccounts);
+
+      if (mappedAccounts.length > 0) {
+        const first = mappedAccounts[0];
+        setSelectedAccount(first);
       }
     } catch (error) {
-      toast.error("Failed to fetch transactions");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAccountsAndTransactions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const accountList = await SERVICES.AccountService.getAll();
-      if (accountList) {
-        const mapped = accountList.map((x) => ({
-          ...x,
-          amountFormatted: Utils.currency.format(x.amount),
-        }));
-
-        setAccounts(mapped);
-
-        if (accountList.length > 0) {
-          const first = mapped[0];
-          setSelectedAccount(first);
-
-          const response = await SERVICES.TransactionService.getAll({
-            accountId: first.id,
-          });
-          if (response) {
-            const mappedTx = response.map((tx: TransactionModel) => ({
-              ...tx,
-              amountFormatted: Utils.currency.format(tx.amount),
-            }));
-            setTransactions(mappedTx);
-          }
-        }
-      }
-    } catch (error) {
-      toast.error("Failed to fetch data");
+      toast.error("Failed to fetch accounts");
     } finally {
       setLoading(false);
     }
   }, []);
 
+  const fetchTransactionsByAccountId = useCallback(async (accountId: number) => {
+    try {
+      const transactions = await SERVICES.TransactionService.getAll({
+        accountId: accountId
+      }) ?? [];
+
+      const mappedTransactions = transactions?.map(t => ({
+        ...t,
+        amountFormatted: Utils.currency.format(t.amount)
+      })) ?? []
+
+      setTransactions([...mappedTransactions])
+
+    } catch (error) {
+      console.log(error);
+    }
+  }, [])
+
   useEffect(() => {
-    fetchAccountsAndTransactions();
-  }, [fetchAccountsAndTransactions]);
+    fetchAccounts();
+  }, [fetchAccounts]);
+
+  useEffect(() => {
+    if (selectedAccount?.id) {
+      fetchTransactionsByAccountId(selectedAccount.id);
+    }
+  }, [selectedAccount]);
+
+
+
+  const onAccountSubmitSuccess = () => {
+    console.log("account");
+    fetchAccounts();
+
+  }
+
+  const onTransactionSubmitSuccess = async () => {
+    if (!selectedAccount?.id) return;
+    console.log("hello");
+
+
+    if (selectedAccount?.id) {
+      await fetchTransactionsByAccountId(selectedAccount?.id)
+    }
+  }
+
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
@@ -138,7 +152,7 @@ export default function Account() {
     } finally {
       setLoading(false);
       toast.success("Account deleted successfully");
-      fetchAccountsAndTransactions();
+
     }
   };
 
@@ -169,7 +183,7 @@ export default function Account() {
               accounts.map((account) => (
                 <div
                   key={account.id}
-                  onClick={() => setAccount(account)}
+                  onClick={() => setSelectedAccount(account)}
                   className={clsx(
                     `group flex justify-between items-center hover:bg-amber-400 px-4 py-2 cursor-pointer`,
                     account.id === selectedAccount?.id && "bg-amber-500"
@@ -198,22 +212,21 @@ export default function Account() {
           </div>
         </div>
         <div className="flex flex-col flex-1 bg-white shadow-lg rounded-md">
-          <div className="flex justify-between items-center border border-slate-100">
-            <h5 className="px-4 py-2 font-medium text-gray-700 text-lg">
+          <div className="flex justify-between items-center px-4 py-2 border border-slate-100">
+            <h5 className="font-medium text-gray-700 text-lg">
               Transaction History
             </h5>
             {accounts.length > 0 && (
               <button
                 type="button"
                 onClick={() => handleOpenModal('transaction')}
-                className="bg-slate-100 hover:bg-slate-50 px-4 py-2 border border-slate-300 rounded font-medium text-sm cursor-pointer"
+                className="bg-slate-100 hover:bg-slate-50 px-4 py-1 border border-slate-300 rounded font-medium text-sm cursor-pointer"
               >
                 Add new transaction
               </button>
             )}
           </div>
-          <div className='flex-1 bg-red-50 p-4'>
-            g
+          <div className='flex-1 p-4'>
             {accounts.length > 0 && (
               <DataGrid columns={columns} data={transactions} />
             )}
@@ -225,7 +238,7 @@ export default function Account() {
       {/* Modal */}
       {!hasTransactionModal ? (
         <Modal isOpen={modal.isOpen} onClose={modal.close} title="Add Account">
-          <AccountForm modal={modal} onSuccess={fetchAccountsAndTransactions} />
+          <AccountForm modal={modal} onSuccess={onAccountSubmitSuccess} />
         </Modal>
       ) : (
         <Modal
@@ -235,7 +248,7 @@ export default function Account() {
         >
           <TransactionForm
             modal={modal}
-            onSuccess={fetchAccountsAndTransactions}
+            onSuccess={onTransactionSubmitSuccess}
           />
         </Modal>
       )}

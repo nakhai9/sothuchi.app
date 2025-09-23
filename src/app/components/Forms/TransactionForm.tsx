@@ -87,13 +87,16 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
         paidAt: new Date(data.paidAt),
         type: type
       })
+      await onSuccess?.();
       toast.success("Created successfully");
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
-      modal.close();
+
       setLoading(false);
-      onSuccess?.();
+
+
+      modal.close();
     }
   };
 

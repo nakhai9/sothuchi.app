@@ -1,13 +1,21 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { ChevronDown, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  ChevronDown,
+  LogOut,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { Utils } from "@/lib/utils";
-import { useGlobalStore } from "@/store/globalStore";
+import { Utils } from '@/lib/utils';
+import { useGlobalStore } from '@/store/globalStore';
 
-import Breadcrumb from "./Breadcrumb";
+import Breadcrumb from './Breadcrumb';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -64,7 +72,12 @@ export default function PageLayout({
     <div className="relative min-h-screen">
       <div className="bg-amber-500 w-full">
         <div className="flex justify-between items-center mx-auto px-4 max-w-6xl h-14">
-          <div className="font-medium text-gray-700 text-3xl">ExpApp</div>
+          <Link
+            href="/dashboard"
+            className="font-medium text-gray-700 text-3xl"
+          >
+            ExpApp
+          </Link>
           <div className="relative" ref={dropdownRef}>
             <div
               className="flex items-center gap-2 p-2 rounded-lg transition-colors cursor-pointer"

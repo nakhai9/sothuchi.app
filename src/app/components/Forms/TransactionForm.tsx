@@ -1,28 +1,39 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from 'react';
 
-import clsx from "clsx";
-import { TrendingDown, TrendingUp } from "lucide-react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import z from "zod";
+import clsx from 'clsx';
+import {
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+import {
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import toast from 'react-hot-toast';
+import z from 'zod';
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { DataGrid } from "@/app/ui";
-import { UseModalReturn } from "@/hooks/useModal";
-import { SERVICES } from "@/services/service";
-import { useGlobalStore } from "@/store/globalStore";
-import { DropdownOption } from "@/types/base";
-import { ReceiptTransaction } from "@/types/transaction";
+import { DataGrid } from '@/app/ui';
+import { UseModalReturn } from '@/hooks/useModal';
+import { CATEGORIES } from '@/lib/constants/categories';
+import { SERVICES } from '@/services/service';
+import { useGlobalStore } from '@/store/globalStore';
+import { DropdownOption } from '@/types/base';
+import { ReceiptTransaction } from '@/types/transaction';
 
-import FileUploadZone from "../FileUploadZone";
-import toast from "react-hot-toast";
+import FileUploadZone from '../FileUploadZone';
 
 const transactionSchema = z.object({
   amount: z.number().min(1, "Amount is required"),
   description: z.string().min(1, "Description is required"),
   accountId: z.string().min(1, "Account is required"),
   paidAt: z.string().min(1, "Date is required"),
+  category: z.string().min(1, "Category is required"),
 });
 
 export type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -38,7 +49,10 @@ const columns = [
   { title: "Date", field: "date" as const },
 ];
 
-export default function TransactionForm({ modal, onSuccess }: TransactionFormProps) {
+export default function TransactionForm({
+  modal,
+  onSuccess,
+}: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -56,6 +70,7 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
       description: "",
       accountId: "",
       paidAt: "",
+      category: "",
     },
   });
 
@@ -65,8 +80,7 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
     const fetchData = async () => {
       try {
         const accounts = await SERVICES.LookupService.getAccounts();
-        if (accounts)
-          setAccountOptions(accounts);
+        if (accounts) setAccountOptions(accounts);
       } catch (error) {
         console.log(error);
       }
@@ -85,16 +99,15 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
         amount: data.amount,
         description: data.description,
         paidAt: new Date(data.paidAt),
-        type: type
-      })
+        type: type,
+        category: data.category,
+      });
       await onSuccess?.();
       toast.success("Created successfully");
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
-
       setLoading(false);
-
 
       modal.close();
     }
@@ -145,56 +158,64 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
       <div className="flex justify-center items-center gap-5">
         <SwitchType />
       </div>
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="amount"
-          className="block font-bold text-gray-800 text-sm"
-        >
-          Amount
-        </label>
-        <input
-          type="number"
-          id="amount"
-          {...register("amount", { valueAsNumber: true })}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.amount ? "border-red-500" : "border-slate-300"
+      <div className="flex gap-4">
+        <div className="flex flex-col gap-1 w-full">
+          <label
+            htmlFor="amount"
+            className="block font-medium text-gray-600 text-sm"
+          >
+            Amount
+          </label>
+          <input
+            type="number"
+            id="amount"
+            {...register("amount", { valueAsNumber: true })}
+            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+              errors.amount ? "border-red-500" : "border-slate-300"
             }`}
-        />
-        {errors.amount && (
-          <span className="text-red-500 text-xs">{errors.amount.message}</span>
-        )}
-      </div>
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="description"
-          className="block font-bold text-gray-800 text-sm"
-        >
-          Description
-        </label>
-        <input
-          type="text"
-          id="description"
-          {...register("description")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.description ? "border-red-500" : "border-slate-300"
+          />
+          {errors.amount && (
+            <span className="text-red-500 text-xs">
+              {errors.amount.message}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-col gap-1 w-full">
+          <label
+            htmlFor="date"
+            className="block font-medium text-gray-600 text-sm"
+          >
+            Paid at
+          </label>
+          <input
+            type="date"
+            id="date"
+            {...register("paidAt")}
+            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+              errors.paidAt ? "border-red-500" : "border-slate-300"
             }`}
-        />
-        {errors.description && (
-          <span className="text-red-500 text-xs">
-            {errors.description.message}
-          </span>
-        )}
+          />
+          {errors.paidAt && (
+            <span className="text-red-500 text-xs">
+              {errors.paidAt.message}
+            </span>
+          )}
+        </div>
       </div>
+
       <div className="flex flex-col gap-1">
         <label
           htmlFor="accountId"
-          className="block font-bold text-gray-800 text-sm"
+          className="block font-medium text-gray-600 text-sm"
         >
           Account
         </label>
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
-            }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.accountId ? "border-red-500" : "border-slate-300"
+          }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -217,19 +238,62 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
           </span>
         )}
       </div>
+
       <div className="flex flex-col gap-1">
-        <label htmlFor="date" className="block font-bold text-gray-800 text-sm">
-          Paid at
+        <label
+          htmlFor="accountId"
+          className="block font-medium text-gray-600 text-sm"
+        >
+          Category
+        </label>
+        <select
+          id="category"
+          {...register("category")}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.category ? "border-red-500" : "border-slate-300"
+          }`}
+        >
+          <option value="" disabled hidden>
+            - Select -
+          </option>
+          {CATEGORIES.length ? (
+            CATEGORIES.filter((x) => x.type === type).map((x) => (
+              <option key={x.id} value={x.value}>
+                {x.name}
+              </option>
+            ))
+          ) : (
+            <option key="other" value="0">
+              Other
+            </option>
+          )}
+        </select>
+        {errors.accountId && (
+          <span className="text-red-500 text-xs">
+            {errors.accountId.message}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label
+          htmlFor="description"
+          className="block font-medium text-gray-600 text-sm"
+        >
+          Description
         </label>
         <input
-          type="date"
-          id="date"
-          {...register("paidAt")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.paidAt ? "border-red-500" : "border-slate-300"
-            }`}
+          type="text"
+          id="description"
+          {...register("description")}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.description ? "border-red-500" : "border-slate-300"
+          }`}
         />
-        {errors.paidAt && (
-          <span className="text-red-500 text-xs">{errors.paidAt.message}</span>
+        {errors.description && (
+          <span className="text-red-500 text-xs">
+            {errors.description.message}
+          </span>
         )}
       </div>
 
@@ -260,15 +324,16 @@ export default function TransactionForm({ modal, onSuccess }: TransactionFormPro
       <div className="flex flex-col gap-1">
         <label
           htmlFor="accountId"
-          className="block font-bold text-gray-800 text-sm"
+          className="block font-medium text-gray-600 text-sm"
         >
           Account
         </label>
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
-            }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.accountId ? "border-red-500" : "border-slate-300"
+          }`}
         >
           <option value="" disabled hidden>
             - Select -

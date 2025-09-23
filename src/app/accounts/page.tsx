@@ -32,11 +32,27 @@ import {
 } from '../ui';
 
 const columns = [
+  // {
+  //   title: "Category",
+  //   filed: "category" as const,
+  //   cellRender: (row: TransactionModel & BaseEntity) => {
+  //     return (
+  //       <div className="relative w-8 h-8">
+  //         <Image
+  //           src={CATEGORIES.find((x) => x.value === row.category)?.icon ?? ""}
+  //           alt=""
+  //           fill
+  //           className="object-contain"
+  //         />
+  //       </div>
+  //     );
+  //   },
+  // },
   { title: "Description", field: "description" as const },
   {
     title: "Amount",
     field: "amountFormatted" as const,
-    cellRender: (row: TransactionModel) => (
+    cellRender: (row: TransactionModel & BaseEntity) => (
       <div
         className={clsx(
           row.type === "expense" ? "text-red-600" : "text-green-600"
@@ -48,13 +64,13 @@ const columns = [
   },
   {
     title: "Paid at",
-    field: 'paidAt' as const,
-  }
+    field: "paidAt" as const,
+  },
 ];
 
 enum ModalName {
-  Account = 'account',
-  Transaction = 'transaction'
+  Account = "account",
+  Transaction = "transaction",
 }
 
 export default function Account() {
@@ -64,7 +80,9 @@ export default function Account() {
   const [selectedAccount, setSelectedAccount] = useState<
     (AccountModel & BaseEntity) | null
   >(null);
-  const [transactions, setTransactions] = useState<TransactionModel[]>([]);
+  const [transactions, setTransactions] = useState<
+    (TransactionModel & BaseEntity)[]
+  >([]);
 
   const setLoading = useGlobalStore((state) => state.setLoading);
 
@@ -76,13 +94,13 @@ export default function Account() {
   const fetchAccounts = useCallback(async () => {
     setLoading(true);
     try {
-
       const accounts = await SERVICES.AccountService.getAll();
 
-      const mappedAccounts = accounts?.map(a => ({
-        ...a,
-        amountFormatted: Utils.currency.format(a.amount)
-      })) ?? [];
+      const mappedAccounts =
+        accounts?.map((a) => ({
+          ...a,
+          amountFormatted: Utils.currency.format(a.amount),
+        })) ?? [];
 
       setAccounts(mappedAccounts);
 
@@ -102,35 +120,35 @@ export default function Account() {
 
   const fetchTransactionsByAccountId = async (accountId: number) => {
     try {
-      const transactions = await SERVICES.TransactionService.getAll({
-        accountId: accountId
-      }) ?? [];
+      const transactions =
+        (await SERVICES.TransactionService.getAll({
+          accountId: accountId,
+        })) ?? [];
 
-      const mappedTransactions = transactions?.map(t => ({
-        ...t,
-        amountFormatted: Utils.currency.format(t.amount)
-      })) ?? []
+      const mappedTransactions =
+        transactions?.map((t) => ({
+          ...t,
+          amountFormatted: Utils.currency.format(t.amount),
+        })) ?? [];
 
-      setTransactions([...mappedTransactions])
-
+      setTransactions([...mappedTransactions]);
     } catch (error) {
       console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchAccounts();
   }, [fetchAccounts]);
 
-
   const onAccountSubmitSuccess = () => {
     fetchAccounts();
-  }
+  };
 
   const onTransactionSubmitSuccess = async () => {
     if (!selectedAccount?.id) return;
-    await fetchTransactionsByAccountId(selectedAccount.id)
-  }
+    await fetchTransactionsByAccountId(selectedAccount.id);
+  };
 
   const deleteAccount = async (id: number | undefined) => {
     if (!id) return;
@@ -150,7 +168,7 @@ export default function Account() {
     if (!account?.id) return;
     setSelectedAccount(account);
     fetchTransactionsByAccountId(account.id);
-  }
+  };
 
   const actions = [
     <IconButton
@@ -222,7 +240,7 @@ export default function Account() {
               </button>
             )}
           </div>
-          <div className='flex-1 p-4'>
+          <div className="flex-1 p-4">
             {accounts.length > 0 && (
               <DataGrid columns={columns} data={transactions} />
             )}
@@ -230,23 +248,25 @@ export default function Account() {
         </div>
       </div>
 
-
       {/* Modal */}
       <Modal
         isOpen={modal.isOpen}
         onClose={modal.close}
-        title={modalName === ModalName.Transaction ? 'Add Transaction' : 'Add Account'}
-      >
-        {
-          modalName === ModalName.Account ?
-            <AccountForm modal={modal} onSuccess={onAccountSubmitSuccess} />
-            : <TransactionForm
-              modal={modal}
-              onSuccess={onTransactionSubmitSuccess}
-            />
+        title={
+          modalName === ModalName.Transaction
+            ? "Add Transaction"
+            : "Add Account"
         }
+      >
+        {modalName === ModalName.Account ? (
+          <AccountForm modal={modal} onSuccess={onAccountSubmitSuccess} />
+        ) : (
+          <TransactionForm
+            modal={modal}
+            onSuccess={onTransactionSubmitSuccess}
+          />
+        )}
       </Modal>
-
     </PageLayout>
   );
 }

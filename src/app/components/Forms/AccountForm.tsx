@@ -1,14 +1,17 @@
 "use client";
 
-import { SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { z } from "zod";
+import {
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import toast from 'react-hot-toast';
+import { z } from 'zod';
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { UseModalReturn } from "@/hooks/useModal";
-import { SERVICES } from "@/services/service";
-import { useGlobalStore } from "@/store/globalStore";
+import { UseModalReturn } from '@/hooks/useModal';
+import { SERVICES } from '@/services/service';
+import { useGlobalStore } from '@/store/globalStore';
 
 const accountSchema = z.object({
   name: z.string().nonempty("Name is required"),
@@ -33,10 +36,11 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
     mode: "onTouched",
   });
 
-  const userInfo = useGlobalStore((state) => state.userInfo);
   const setLoading = useGlobalStore((state) => state.setLoading);
 
-  const onSubmit: SubmitHandler<AccountFormData> = async (data: AccountFormData) => {
+  const onSubmit: SubmitHandler<AccountFormData> = async (
+    data: AccountFormData
+  ) => {
     setLoading(true);
     try {
       await SERVICES.AccountService.create({

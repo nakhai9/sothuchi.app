@@ -2,9 +2,11 @@ export type TransactionModel = {
   description: string;
   amount: number;
   type: "income" | "expense";
-  amountFormatted?: string;
   accountId: number;
   paidAt: Date;
+  category: string;
+
+  amountFormatted?: string;
 };
 
 export type ReceiptTransaction = {

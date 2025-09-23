@@ -70,7 +70,7 @@ export const SERVICES = {
         console.log(error);
       }
     },
-    create: async (payload: TransactionModel & BaseEntity): Promise<void> => {
+    create: async (payload: TransactionModel): Promise<void> => {
       try {
         await httpService.post(BASE_URLS.transactions, payload);
       } catch (error) {

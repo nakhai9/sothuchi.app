@@ -76,7 +76,7 @@ export default function PageLayout({
             href="/dashboard"
             className="font-medium text-gray-700 text-3xl"
           >
-            ExpApp
+            Sothuchi
           </Link>
           <div className="relative" ref={dropdownRef}>
             <div

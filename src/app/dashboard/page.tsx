@@ -18,6 +18,7 @@ import { useModal } from '@/hooks';
 import { CATEGORIES } from '@/lib/constants/categories';
 import { Utils } from '@/lib/utils';
 import { SERVICES } from '@/services/service';
+import { useGlobalStore } from '@/store/globalStore';
 import { BaseEntity } from '@/types/base';
 import {
   TransactionModel,
@@ -78,7 +79,7 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState<
     (TransactionModel & BaseEntity)[]
   >([]);
-
+  const setLoading = useGlobalStore((state) => state.setLoading);
   const handleGoToPage = (url: string) => {
     router.push(url);
   };
@@ -88,13 +89,16 @@ export default function Dashboard() {
   };
 
   const fetchTransactionReport = useCallback(async () => {
+    setLoading(true);
     const report = await SERVICES.TransactionService.getReport();
     if (report) {
       setReport(report);
     }
+    setLoading(false);
   }, []);
 
   const fetchTransactions = useCallback(async () => {
+    setLoading(true);
     const transactions = await SERVICES.TransactionService.getAll({
       page: 1,
       limit: 10,
@@ -108,6 +112,7 @@ export default function Dashboard() {
         }))
       );
     }
+    setLoading(false);
   }, []);
 
   useEffect(() => {

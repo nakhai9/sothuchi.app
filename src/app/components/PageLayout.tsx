@@ -1,22 +1,14 @@
 "use client";
-import {
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import {
-  ChevronDown,
-  LayoutDashboard,
-  LogOut,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { Utils } from '@/lib/utils';
-import { useGlobalStore } from '@/store/globalStore';
+import { Utils } from "@/lib/utils";
+import { useGlobalStore } from "@/store/globalStore";
 
-import Breadcrumb from './Breadcrumb';
+import Breadcrumb from "./Breadcrumb";
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -66,7 +58,7 @@ export default function PageLayout({
     clearUserInfo();
     setIsDropdownOpen(false);
     setLoading(false);
-    router.push("/");
+    router.push("/auth/sign-in");
   };
 
   return (
@@ -96,8 +88,9 @@ export default function PageLayout({
               </div>
 
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""
-                  }`}
+                className={`w-4 h-4 transition-transform ${
+                  isDropdownOpen ? "rotate-180" : ""
+                }`}
               />
             </div>
 
@@ -112,7 +105,6 @@ export default function PageLayout({
                   <p className="text-gray-500 text-sm">{userInfo?.email}</p>
                 </div>
                 <div className="flex flex-col">
-
                   <Link
                     href="/categories"
                     className="flex justify-between items-center gap-2 hover:bg-amber-400 px-4 py-2 text-sm cursor-pointer"

@@ -15,3 +15,8 @@ export type ReceiptTransaction = {
   amount: number;
   date: Date;
 };
+
+export type TransactionReport = {
+  totalIncome: number;
+  totalExpense: number;
+};

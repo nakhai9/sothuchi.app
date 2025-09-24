@@ -1,7 +1,7 @@
 import { Utils } from '@/lib/utils';
 import {
   AccountModel,
-  AccountReportDto,
+  AccountReport,
 } from '@/types/account';
 import {
   BaseEntity,
@@ -12,6 +12,7 @@ import { CategoryModel } from '@/types/category';
 import {
   ReceiptTransaction,
   TransactionModel,
+  TransactionReport,
 } from '@/types/transaction';
 import {
   UserInfo,
@@ -79,6 +80,16 @@ export const SERVICES = {
         console.error(error);
       }
     },
+    getReport: async (): Promise<TransactionReport | undefined> => {
+      try {
+        const { data } = await httpService.get<ResponseBase<TransactionReport>>(
+          `${BASE_URLS.transactions}/report`
+        );
+        return data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
 
   // Account Service
@@ -107,9 +118,9 @@ export const SERVICES = {
         console.log(error);
       }
     },
-    getReport: async (id: number): Promise<AccountReportDto | undefined> => {
+    getReport: async (id: number): Promise<AccountReport | undefined> => {
       try {
-        const { data } = await httpService.get<ResponseBase<AccountReportDto>>(
+        const { data } = await httpService.get<ResponseBase<AccountReport>>(
           `${BASE_URLS.accounts}/${id}/report`
         );
         return data;

@@ -5,7 +5,7 @@ export type AccountModel = {
   amountFormatted?: string;
 };
 
-export type AccountReportDto = {
+export type AccountReport = {
   initial: number;
   totalIncome: number;
   totalExpense: number;

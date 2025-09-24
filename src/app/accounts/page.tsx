@@ -23,7 +23,7 @@ import { SERVICES } from '@/services/service';
 import { useGlobalStore } from '@/store/globalStore';
 import {
   AccountModel,
-  AccountReportDto,
+  AccountReport,
 } from '@/types/account';
 import { BaseEntity } from '@/types/base';
 import { TransactionModel } from '@/types/transaction';
@@ -91,7 +91,7 @@ export default function Account() {
   const [transactions, setTransactions] = useState<
     (TransactionModel & BaseEntity)[]
   >([]);
-  const [report, setReport] = useState<AccountReportDto | null>(null);
+  const [report, setReport] = useState<AccountReport | null>(null);
 
   const setLoading = useGlobalStore((state) => state.setLoading);
 

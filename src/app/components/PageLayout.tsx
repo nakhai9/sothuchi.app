@@ -54,10 +54,8 @@ export default function PageLayout({
 
   const handleLogout = () => {
     // Add logout logic here
-    setLoading(true);
     clearUserInfo();
     setIsDropdownOpen(false);
-    setLoading(false);
     router.push("/auth/sign-in");
   };
 

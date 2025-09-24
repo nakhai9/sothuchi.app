@@ -1,5 +1,10 @@
-import { format } from "date-fns";
-import { upperFirst, words } from "lodash";
+import { format } from 'date-fns';
+import {
+  upperFirst,
+  words,
+} from 'lodash';
+
+import { USER_CURRENCY } from './constants/categories';
 
 export const Utils = {
   file: {
@@ -18,7 +23,7 @@ export const Utils = {
     format: (amount: number) => {
       return new Intl.NumberFormat("en-US", {
         style: "currency",
-        currency: "VND",
+        currency: USER_CURRENCY,
       }).format(amount);
     },
   },

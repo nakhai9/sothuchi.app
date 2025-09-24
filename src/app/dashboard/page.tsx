@@ -1,17 +1,24 @@
 "use client";
-import { CirclePlus, ReceiptText, WalletMinimal } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  CirclePlus,
+  ReceiptText,
+  WalletMinimal,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-import { useModal } from "@/hooks";
+import { useModal } from '@/hooks';
 
-import { Modal, PageLayout, TransactionForm } from "../components";
-import { IconButton } from "../ui";
+import {
+  Modal,
+  PageLayout,
+  TransactionForm,
+} from '../components';
+import { IconButton } from '../ui';
 
 export default function Dashboard() {
   const router = useRouter();
   const modal = useModal();
 
-  // Mock data - replace with real data from your API
   const totalIncome = 12500.0;
   const totalExpenses = 8750.0;
   const totalBalance = totalIncome - totalExpenses;

@@ -8,15 +8,23 @@ import {
 import clsx from 'clsx';
 import {
   CirclePlus,
+  Repeat,
   Trash,
+  TrendingDown,
+  TrendingUp,
 } from 'lucide-react';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 import { useModal } from '@/hooks';
+import { CATEGORIES } from '@/lib/constants/categories';
 import { Utils } from '@/lib/utils';
 import { SERVICES } from '@/services/service';
 import { useGlobalStore } from '@/store/globalStore';
-import { AccountModel } from '@/types/account';
+import {
+  AccountModel,
+  AccountReportDto,
+} from '@/types/account';
 import { BaseEntity } from '@/types/base';
 import { TransactionModel } from '@/types/transaction';
 
@@ -30,9 +38,6 @@ import {
   DataGrid,
   IconButton,
 } from '../ui';
-import Image from 'next/image';
-import { CATEGORIES } from '@/lib/constants/categories';
-import { format } from 'date-fns';
 
 const columns = [
   {
@@ -86,6 +91,7 @@ export default function Account() {
   const [transactions, setTransactions] = useState<
     (TransactionModel & BaseEntity)[]
   >([]);
+  const [report, setReport] = useState<AccountReportDto | null>(null);
 
   const setLoading = useGlobalStore((state) => state.setLoading);
 
@@ -128,16 +134,31 @@ export default function Account() {
           accountId: accountId,
         })) ?? [];
 
+      const report = await fetchAccountReport(accountId);
+      if (report) {
+        setReport(report);
+      }
+
       const mappedTransactions =
         transactions?.map((t) => ({
           ...t,
           amountFormatted: Utils.currency.format(t.amount),
-          paidAtFormatted: Utils.date.format(t.paidAt)
+          paidAtFormatted: Utils.date.format(t.paidAt),
         })) ?? [];
 
       setTransactions([...mappedTransactions]);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const fetchAccountReport = async (accountId: number) => {
+    try {
+      const report = await SERVICES.AccountService.getReport(accountId);
+      return report;
+    } catch (error) {
+      console.log(error);
+      return null;
     }
   };
 
@@ -204,7 +225,7 @@ export default function Account() {
                   onClick={() => selectAccount(account)}
                   className={clsx(
                     `group flex justify-between items-center hover:bg-amber-400 px-4 py-2 border-slate-200 border-b cursor-pointer`,
-                    account.id === selectedAccount?.id && "bg-amber-500"
+                    account.id === selectedAccount?.id && "bg-amber-300"
                   )}
                 >
                   <div>
@@ -229,25 +250,64 @@ export default function Account() {
             )}
           </div>
         </div>
-        <div className="flex flex-col flex-1 bg-white shadow-lg rounded-md">
-          <div className="flex justify-between items-center px-4 py-2 border border-slate-100">
-            <h5 className="font-medium text-gray-700 text-lg">
-              Transaction History
-            </h5>
-            {accounts.length > 0 && (
-              <button
-                type="button"
-                onClick={() => handleOpenModal(ModalName.Transaction)}
-                className="bg-slate-100 hover:bg-slate-50 px-4 py-1 border border-slate-300 rounded font-medium text-sm cursor-pointer"
-              >
-                Add new transaction
-              </button>
-            )}
-          </div>
-          <div className="flex-1 p-4">
-            {accounts.length > 0 && (
-              <DataGrid columns={columns} data={transactions} />
-            )}
+        <div className="flex flex-col flex-1 gap-4">
+          {accounts.length > 0 && (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-gray-600 p-4 bg-white rounded-md shadow-lg">
+                <div className="text-gray-600 flex font-semibold items-center gap-2">
+                  Total Income
+                  <span className="text-green-600">
+                    <TrendingUp size={20} />
+                  </span>
+                </div>
+                <p className="text-xl font-bold">
+                  {Utils.currency.format(report?.totalIncome ?? 0)}
+                </p>
+              </div>
+              <div className="text-gray-600 p-4 bg-white rounded-md shadow-lg">
+                <div className="text-gray-600 flex font-semibold items-center gap-2">
+                  Total Expense
+                  <span className="text-red-600">
+                    <TrendingDown size={20} />
+                  </span>
+                </div>
+                <p className="text-xl font-bold">
+                  {Utils.currency.format(report?.totalExpense ?? 0)}
+                </p>
+              </div>
+              <div className="text-gray-600 p-4 bg-white rounded-md shadow-lg">
+                <div className="text-gray-600 flex font-semibold items-center gap-2">
+                  Balance
+                  <span className="text-blue-600">
+                    <Repeat size={20} />
+                  </span>
+                </div>
+                <p className="text-xl font-bold">
+                  {Utils.currency.format(report?.balance ?? 0)}
+                </p>
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col flex-1 bg-white shadow-lg rounded-md">
+            <div className="flex justify-between items-center px-4 py-2 border border-slate-100">
+              <h5 className="font-medium text-gray-700 text-lg">
+                Transaction History
+              </h5>
+              {accounts.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleOpenModal(ModalName.Transaction)}
+                  className="bg-slate-100 hover:bg-slate-50 px-4 py-1 border border-slate-300 rounded font-medium text-sm cursor-pointer"
+                >
+                  Add new transaction
+                </button>
+              )}
+            </div>
+            <div className="flex-1 p-4">
+              {accounts.length > 0 && (
+                <DataGrid columns={columns} data={transactions} />
+              )}
+            </div>
           </div>
         </div>
       </div>

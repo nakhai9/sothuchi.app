@@ -133,6 +133,20 @@ export const CATEGORIES: Category[] = [
     value: "debt",
   },
   {
+    id: 21,
+    name: "Tips or Donation",
+    icon: "https://www.svgrepo.com/show/281132/money-cash.svg",
+    type: "income",
+    value: "tips_or_donation",
+  },
+  {
+    id: 22,
+    name: "Saving",
+    icon: "https://www.svgrepo.com/show/301523/piggy-bank.svg",
+    type: "income",
+    value: "saving",
+  },
+  {
     id: 9998,
     name: "Income Default",
     icon: "https://www.svgrepo.com/show/230377/money-bag-money.svg",
@@ -147,3 +161,5 @@ export const CATEGORIES: Category[] = [
     value: "expense_default",
   },
 ];
+
+export const USER_CURRENCY = "USD";

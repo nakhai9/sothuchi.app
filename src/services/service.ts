@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
 import { Utils } from '@/lib/utils';
-import { AccountModel } from '@/types/account';
+import {
+  AccountModel,
+  AccountReportDto,
+} from '@/types/account';
 import {
   BaseEntity,
   DropdownOption,
@@ -19,6 +19,8 @@ import {
   UserSignUp,
   UserToken,
 } from '@/types/user';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { httpService } from '../lib/config/httpService';
 
@@ -101,6 +103,16 @@ export const SERVICES = {
     softDelete: async (id: number): Promise<void> => {
       try {
         await httpService.delete(`${BASE_URLS.accounts}/${id}`);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getReport: async (id: number): Promise<AccountReportDto | undefined> => {
+      try {
+        const { data } = await httpService.get<ResponseBase<AccountReportDto>>(
+          `${BASE_URLS.accounts}/${id}/report`
+        );
+        return data;
       } catch (error) {
         console.log(error);
       }

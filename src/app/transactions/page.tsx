@@ -61,7 +61,7 @@ const columns = [
   },
   {
     title: "Paid at",
-    field: "paidAt" as const,
+    field: "paidAtFormatted" as const,
   },
 ];
 
@@ -82,6 +82,7 @@ export default function Transactions() {
           ...list.map((x: TransactionModel & BaseEntity) => ({
             ...x,
             amountFormatted: Utils.currency.format(x.amount),
+            paidAtFormatted: Utils.date.format(x.paidAt)
           })),
         ]);
       }

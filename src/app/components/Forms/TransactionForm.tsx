@@ -66,10 +66,10 @@ export default function TransactionForm({
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      amount: undefined,
+      amount: 0,
       description: "",
       accountId: "",
-      paidAt: "",
+      paidAt: new Date().toISOString().slice(0, 10),
       category: "",
     },
   });
@@ -132,7 +132,7 @@ export default function TransactionForm({
         type="button"
         className={clsx(
           `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
-          type === "expense" ? "bg-amber-200" : ""
+          type === "expense" ? "bg-red-200" : ""
         )}
         onClick={() => setType("expense")}
       >
@@ -143,7 +143,7 @@ export default function TransactionForm({
         type="button"
         className={clsx(
           `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
-          type === "income" ? "bg-amber-200" : ""
+          type === "income" ? "bg-green-200" : ""
         )}
         onClick={() => setType("income")}
       >
@@ -170,9 +170,8 @@ export default function TransactionForm({
             type="number"
             id="amount"
             {...register("amount", { valueAsNumber: true })}
-            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-              errors.amount ? "border-red-500" : "border-slate-300"
-            }`}
+            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.amount ? "border-red-500" : "border-slate-300"
+              }`}
           />
           {errors.amount && (
             <span className="text-red-500 text-xs">
@@ -191,9 +190,8 @@ export default function TransactionForm({
             type="date"
             id="date"
             {...register("paidAt")}
-            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-              errors.paidAt ? "border-red-500" : "border-slate-300"
-            }`}
+            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.paidAt ? "border-red-500" : "border-slate-300"
+              }`}
           />
           {errors.paidAt && (
             <span className="text-red-500 text-xs">
@@ -213,9 +211,8 @@ export default function TransactionForm({
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.accountId ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
+            }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -249,9 +246,8 @@ export default function TransactionForm({
         <select
           id="category"
           {...register("category")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.category ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.category ? "border-red-500" : "border-slate-300"
+            }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -286,9 +282,8 @@ export default function TransactionForm({
           type="text"
           id="description"
           {...register("description")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.description ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.description ? "border-red-500" : "border-slate-300"
+            }`}
         />
         {errors.description && (
           <span className="text-red-500 text-xs">
@@ -331,9 +326,8 @@ export default function TransactionForm({
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.accountId ? "border-red-500" : "border-slate-300"
-          }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
+            }`}
         >
           <option value="" disabled hidden>
             - Select -

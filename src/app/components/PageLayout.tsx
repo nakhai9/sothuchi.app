@@ -7,6 +7,7 @@ import {
 
 import {
   ChevronDown,
+  LayoutDashboard,
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -95,9 +96,8 @@ export default function PageLayout({
               </div>
 
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  isDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </div>
 
@@ -112,6 +112,14 @@ export default function PageLayout({
                   <p className="text-gray-500 text-sm">{userInfo?.email}</p>
                 </div>
                 <div className="flex flex-col">
+
+                  <Link
+                    href="/categories"
+                    className="flex justify-between items-center gap-2 hover:bg-amber-400 px-4 py-2 text-sm cursor-pointer"
+                  >
+                    <span>Categories</span>
+                    <LayoutDashboard size={16} />
+                  </Link>
                   <button
                     type="button"
                     onClick={handleLogout}

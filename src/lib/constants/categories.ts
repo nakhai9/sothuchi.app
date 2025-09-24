@@ -1,15 +1,22 @@
-export const CATEGORIES = [
+type Category = {
+  id: number;
+  name: string;
+  icon: string;
+  type: "income" | "expense";
+  value: string;
+};
+export const CATEGORIES: Category[] = [
   {
     id: 1,
     name: "Drink",
-    icon: "https://www.svgrepo.com/show/14950/coffee-cup.svg",
+    icon: "https://www.svgrepo.com/show/427614/cafe-coffee-cup-2.svg",
     type: "expense",
     value: "drink",
   },
   {
     id: 2,
-    name: "Food and Drink",
-    icon: "https://www.svgrepo.com/show/191854/cutlery-spoon.svg",
+    name: "Food",
+    icon: "https://www.svgrepo.com/show/184628/fast-food-burger.svg",
     type: "expense",
     value: "food",
   },
@@ -65,7 +72,7 @@ export const CATEGORIES = [
   {
     id: 10,
     name: "Shopping",
-    icon: "https://www.svgrepo.com/show/293542/shopping-bag.svg",
+    icon: "https://www.svgrepo.com/show/184621/shopping-bag-supermarket.svg",
     type: "expense",
     value: "shopping",
   },
@@ -98,10 +105,45 @@ export const CATEGORIES = [
     value: "repair",
   },
   {
-    id: 15,
-    name: "Other",
+    id: 16,
+    name: "Electronics",
+    icon: "https://www.svgrepo.com/show/258576/battery.svg",
+    type: "expense",
+    value: "electronics",
+  },
+  {
+    id: 17,
+    name: "Water",
+    icon: "https://www.svgrepo.com/show/190855/water-drop-water.svg",
+    type: "expense",
+    value: "water",
+  },
+  {
+    id: 19,
+    name: "Loan",
+    icon: "https://www.svgrepo.com/show/228095/loan.svg",
+    type: "expense",
+    value: "loan",
+  },
+  {
+    id: 20,
+    name: "Debt",
+    icon: "https://www.svgrepo.com/show/235127/money.svg",
+    type: "income",
+    value: "debt",
+  },
+  {
+    id: 9998,
+    name: "Income Default",
+    icon: "https://www.svgrepo.com/show/230377/money-bag-money.svg",
+    type: "income",
+    value: "income_default",
+  },
+  {
+    id: 9999,
+    name: "Expense Default",
     icon: "https://www.svgrepo.com/show/382237/help-question-question-mark.svg",
     type: "expense",
-    value: "other",
+    value: "expense_default",
   },
 ];

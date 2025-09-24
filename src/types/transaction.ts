@@ -7,6 +7,7 @@ export type TransactionModel = {
   category: string;
 
   amountFormatted?: string;
+  paidAtFormatted?: string;
 };
 
 export type ReceiptTransaction = {

@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { upperFirst, words } from "lodash";
 
 export const Utils = {
@@ -25,6 +26,12 @@ export const Utils = {
     getInitial: (text: string) => {
       const parts = words(text);
       return parts.map((p) => upperFirst(p[0])).join("");
+    },
+  },
+  date: {
+    format: (date: Date, formatString?: string) => {
+      const fs = formatString ? formatString : "dd/MM/yyyy";
+      return format(new Date(date), fs);
     },
   },
 };

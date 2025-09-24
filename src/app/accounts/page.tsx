@@ -30,24 +30,27 @@ import {
   DataGrid,
   IconButton,
 } from '../ui';
+import Image from 'next/image';
+import { CATEGORIES } from '@/lib/constants/categories';
+import { format } from 'date-fns';
 
 const columns = [
-  // {
-  //   title: "Category",
-  //   filed: "category" as const,
-  //   cellRender: (row: TransactionModel & BaseEntity) => {
-  //     return (
-  //       <div className="relative w-8 h-8">
-  //         <Image
-  //           src={CATEGORIES.find((x) => x.value === row.category)?.icon ?? ""}
-  //           alt=""
-  //           fill
-  //           className="object-contain"
-  //         />
-  //       </div>
-  //     );
-  //   },
-  // },
+  {
+    title: "Category",
+    field: "category" as const,
+    cellRender: (row: TransactionModel & BaseEntity) => {
+      return (
+        <div className="relative w-8 h-8">
+          <Image
+            src={CATEGORIES.find((x) => x.value === row.category)?.icon ?? ""}
+            alt=""
+            fill
+            className="object-contain"
+          />
+        </div>
+      );
+    },
+  },
   { title: "Description", field: "description" as const },
   {
     title: "Amount",
@@ -64,7 +67,7 @@ const columns = [
   },
   {
     title: "Paid at",
-    field: "paidAt" as const,
+    field: "paidAtFormatted" as const,
   },
 ];
 
@@ -129,6 +132,7 @@ export default function Account() {
         transactions?.map((t) => ({
           ...t,
           amountFormatted: Utils.currency.format(t.amount),
+          paidAtFormatted: Utils.date.format(t.paidAt)
         })) ?? [];
 
       setTransactions([...mappedTransactions]);

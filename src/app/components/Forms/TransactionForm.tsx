@@ -39,7 +39,7 @@ const transactionSchema = z.object({
 export type TransactionFormData = z.infer<typeof transactionSchema>;
 
 type TransactionFormProps = {
-  modal: UseModalReturn;
+  modal?: UseModalReturn;
   onSuccess?: () => void;
 };
 
@@ -109,7 +109,7 @@ export default function TransactionForm({
     } finally {
       setLoading(false);
 
-      modal.close();
+      modal?.close();
     }
   };
 
@@ -190,7 +190,7 @@ export default function TransactionForm({
             type="date"
             id="date"
             {...register("paidAt")}
-            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.paidAt ? "border-red-500" : "border-slate-300"
+            className={`px-3 py-2 border w-full rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.paidAt ? "border-red-500" : "border-slate-300"
               }`}
           />
           {errors.paidAt && (
@@ -295,7 +295,7 @@ export default function TransactionForm({
       <div className="flex justify-end gap-3">
         <button
           type="button"
-          onClick={modal.close}
+          onClick={modal?.close}
           className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
         >
           Cancel
@@ -368,7 +368,7 @@ export default function TransactionForm({
       <div className="flex justify-end gap-3">
         <button
           type="button"
-          onClick={modal.close}
+          onClick={modal?.close}
           className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
         >
           Cancel
@@ -407,8 +407,7 @@ export default function TransactionForm({
           From bill image
         </button>
       </div>
-      {/* {mode === "manual" ? <ManualForm /> : <BillForm />} */}
-      <ManualForm />
+      {mode === "manual" ? <ManualForm /> : <BillForm />}
     </div>
   );
 }

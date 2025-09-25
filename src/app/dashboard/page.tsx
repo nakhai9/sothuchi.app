@@ -34,6 +34,7 @@ import {
   DataGrid,
   IconButton,
 } from '../ui';
+import Link from 'next/link';
 
 const columns = [
   {
@@ -74,7 +75,6 @@ const columns = [
 
 export default function Dashboard() {
   const router = useRouter();
-  const modal = useModal();
   const [report, setReport] = useState<TransactionReport | null>(null);
   const [transactions, setTransactions] = useState<
     (TransactionModel & BaseEntity)[]
@@ -82,10 +82,6 @@ export default function Dashboard() {
   const setLoading = useGlobalStore((state) => state.setLoading);
   const handleGoToPage = (url: string) => {
     router.push(url);
-  };
-
-  const handleOpenTransactionModal = () => {
-    modal.open();
   };
 
   const fetchTransactionReport = useCallback(async () => {
@@ -121,22 +117,6 @@ export default function Dashboard() {
   }, [fetchTransactionReport, fetchTransactions]);
 
   const actions = [
-    <IconButton
-      type="button"
-      key="add-transaction"
-      icon={<CirclePlus size={20} />}
-      onClick={handleOpenTransactionModal}
-      size="md"
-      title="Add transaction"
-    />,
-    <IconButton
-      type="button"
-      key="transactions"
-      icon={<ReceiptText size={20} />}
-      onClick={() => handleGoToPage("/transactions")}
-      size="md"
-      title="Transactions"
-    />,
     <IconButton
       type="button"
       key="wallets"
@@ -177,21 +157,21 @@ export default function Dashboard() {
       </div>
 
       {/* Additional Dashboard Content */}
-      <div className="bg-white shadow-sm p-6 rounded-lg">
-        <h2 className="mb-4 font-semibold text-gray-900 text-xl">
-          Recent Activity
-        </h2>
-        <DataGrid data={transactions} columns={columns} />
-      </div>
+      <div className='flex gap-6'>
+        <div className='bg-white shadow-lg p-4 rounded-md w-96'>
+          <TransactionForm />
+        </div>
+        <div className="flex-1 bg-white shadow-sm p-6 rounded-lg">
+          <div className='flex justify-between items-center mb-2'>
+            <h2 className="font-medium text-gray-600 text-lg">
+              Recent Activity
+            </h2>
+            <Link href="/transactions" className='font-bold text-blue-600 hover:text-blue-400 text-sm'>See all</Link>
+          </div>
+          <DataGrid data={transactions} columns={columns} />
+        </div>
 
-      <Modal
-        isOpen={modal.isOpen}
-        onClose={modal.close}
-        title="Add New Transaction"
-        description="Enter the details of your new transaction below."
-      >
-        <TransactionForm modal={modal} />
-      </Modal>
+      </div>
     </PageLayout>
   );
 }

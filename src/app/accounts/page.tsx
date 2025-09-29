@@ -30,9 +30,7 @@ import {
   TransactionItems,
 } from '../components';
 import AccountForm from '../components/Forms/AccountForm';
-import {
-  IconButton,
-} from '../ui';
+import { IconButton } from '../ui';
 
 enum ModalName {
   Account = "account",
@@ -213,7 +211,8 @@ export default function Account() {
             <div className="gap-4 grid grid-cols-3">
               <div className="bg-white shadow-lg p-4 rounded-md">
                 <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-                  <div className='bg-green-500 rounded-full w-3 h-3'></div> Total Income
+                  <div className="bg-green-500 rounded-full w-3 h-3"></div>{" "}
+                  Total Income
                 </h4>
                 <p className="font-bold text-gray-600 md:text-xl text:sm">
                   {Utils.currency.format(report?.totalIncome ?? 0)}
@@ -221,7 +220,8 @@ export default function Account() {
               </div>
               <div className="bg-white shadow-lg p-4 rounded-md">
                 <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-                  <div className='bg-red-500 rounded-full w-3 h-3'></div> Total Expense
+                  <div className="bg-red-500 rounded-full w-3 h-3"></div> Total
+                  Expense
                 </h4>
                 <p className="font-bold text-gray-600 md:text-xl text:sm">
                   {Utils.currency.format(report?.totalExpense ?? 0)}
@@ -229,7 +229,8 @@ export default function Account() {
               </div>
               <div className="bg-white shadow-lg p-4 rounded-md">
                 <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-                  <div className='bg-blue-500 rounded-full w-3 h-3'></div> Balance
+                  <div className="bg-blue-500 rounded-full w-3 h-3"></div>{" "}
+                  Balance
                 </h4>
                 <p className="font-bold text-gray-600 md:text-xl text:sm">
                   {Utils.currency.format(report?.balance ?? 0)}
@@ -238,11 +239,14 @@ export default function Account() {
             </div>
           )}
           <div className="space-y-4">
-            <h3 className='font-semibold text-gray-500 text-xl'>
+            <h3 className="font-medium text-gray-500 text-lg">
               Transaction History
             </h3>
-            {accounts.length > 0 && <TransactionItems transactions={transactions} />}
-
+            <div className="max-h-[400px] overflow-auto">
+              {accounts.length > 0 && (
+                <TransactionItems transactions={transactions} />
+              )}
+            </div>
           </div>
         </div>
       </div>

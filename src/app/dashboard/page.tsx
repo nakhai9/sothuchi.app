@@ -5,9 +5,8 @@ import {
   useState,
 } from 'react';
 
-import {
-  WalletMinimal,
-} from 'lucide-react';
+import { WalletMinimal } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import { Utils } from '@/lib/utils';
@@ -24,10 +23,7 @@ import {
   TransactionForm,
   TransactionItems,
 } from '../components';
-import {
-  IconButton,
-} from '../ui';
-import Link from 'next/link';
+import { IconButton } from '../ui';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -67,10 +63,14 @@ export default function Dashboard() {
     setLoading(false);
   }, []);
 
-  useEffect(() => {
+  const fetchData = useCallback(async () => {
     fetchTransactionReport();
     fetchTransactions();
   }, [fetchTransactionReport, fetchTransactions]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const actions = [
     <IconButton
@@ -83,6 +83,20 @@ export default function Dashboard() {
     />,
   ];
 
+  const formActions = [
+    <button
+      key="add"
+      type="submit"
+      className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 w-full font-medium text-white text-sm cursor-pointer"
+    >
+      Add
+    </button>,
+  ];
+
+  const onSuccess = async () => {
+    await fetchData();
+  };
+
   return (
     <PageLayout
       title="Dashboard"
@@ -93,8 +107,8 @@ export default function Dashboard() {
       <div className="gap-4 grid grid-cols-2 mb-8">
         {/* Total Income Panel */}
         <div className="bg-white shadow-lg p-4 rounded-md">
-          <div className='flex items-center gap-2'>
-            <div className='bg-green-500 rounded-full w-3 h-3'></div>
+          <div className="flex items-center gap-2">
+            <div className="bg-green-500 rounded-full w-3 h-3"></div>
             <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
               Total Income
             </h4>
@@ -104,11 +118,10 @@ export default function Dashboard() {
           </p>
         </div>
 
-
         {/* Total Expenses Panel */}
         <div className="bg-white shadow-lg p-4 rounded-md">
-          <div className='flex items-center gap-2'>
-            <div className='bg-red-500 rounded-full w-3 h-3'></div>
+          <div className="flex items-center gap-2">
+            <div className="bg-red-500 rounded-full w-3 h-3"></div>
             <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
               Total Expense
             </h4>
@@ -117,34 +130,34 @@ export default function Dashboard() {
             {Utils.currency.format(report?.totalExpense ?? 0)}
           </p>
         </div>
-
       </div>
 
       {/* Additional Dashboard Content */}
-      <div className='flex md:flex-row flex-col gap-4'>
-        <div className='w-full md:w-64'>
-          <h3 className='mb-2 font-medium text-gray-500 text-lg'>
+      <div className="flex md:flex-row flex-col gap-4">
+        <div className="w-full md:w-80">
+          <h3 className="mb-2 font-medium text-gray-500 text-lg">
             Add New Transaction
           </h3>
-          <div className='bg-white shadow p-4 rounded'>
-            <TransactionForm />
-            <button type='button'>
-              Add
-            </button>
+          <div className="bg-white shadow p-4 rounded">
+            <TransactionForm actions={formActions} onSuccess={onSuccess} />
           </div>
         </div>
         <div className="flex-1">
-          <div className='flex justify-between items-center mb-2'>
-            <h3 className='font-medium text-gray-500 text-lg'>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium text-gray-500 text-lg">
               Recent Activity
             </h3>
-            <Link href="/transactions" className='font-bold text-gray-400 hover:text-gray-300 text-sm'>See all</Link>
+            <Link
+              href="/transactions"
+              className="font-bold text-gray-400 hover:text-gray-300 text-sm"
+            >
+              See all
+            </Link>
           </div>
-          <div className=''>
+          <div className="">
             <TransactionItems transactions={transactions} />
           </div>
         </div>
-
       </div>
     </PageLayout>
   );

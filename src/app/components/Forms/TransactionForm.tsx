@@ -40,6 +40,7 @@ export type TransactionFormData = z.infer<typeof transactionSchema>;
 type TransactionFormProps = {
   modal?: UseModalReturn;
   onSuccess?: () => void;
+  actions?: React.ReactNode[];
 };
 
 const columns = [
@@ -51,6 +52,7 @@ const columns = [
 export default function TransactionForm({
   modal,
   onSuccess,
+  actions,
 }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [isLoading, setIsLoading] = useState(false);
@@ -62,6 +64,7 @@ export default function TransactionForm({
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -101,6 +104,7 @@ export default function TransactionForm({
         type: type,
         category: data.category,
       });
+      reset();
       await onSuccess?.();
       toast.success("Created successfully");
     } catch (error) {
@@ -134,7 +138,7 @@ export default function TransactionForm({
         )}
         onClick={() => setType("expense")}
       >
-        <TrendingDown className='text-red-600' size={14} />
+        <TrendingDown className="text-red-600" size={14} />
         Expense
       </button>
       <button
@@ -145,8 +149,7 @@ export default function TransactionForm({
         )}
         onClick={() => setType("income")}
       >
-
-        <TrendingUp className='text-green-600' size={14} />
+        <TrendingUp className="text-green-600" size={14} />
         Income
       </button>
     </div>
@@ -169,8 +172,9 @@ export default function TransactionForm({
             type="number"
             id="amount"
             {...register("amount", { valueAsNumber: true })}
-            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.amount ? "border-red-500" : "border-slate-300"
-              }`}
+            className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+              errors.amount ? "border-red-500" : "border-slate-300"
+            }`}
           />
           {errors.amount && (
             <span className="text-red-500 text-xs">
@@ -189,8 +193,9 @@ export default function TransactionForm({
             type="date"
             id="date"
             {...register("paidAt")}
-            className={`px-3 py-2 border w-full rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.paidAt ? "border-red-500" : "border-slate-300"
-              }`}
+            className={`px-3 py-2 border w-full rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+              errors.paidAt ? "border-red-500" : "border-slate-300"
+            }`}
           />
           {errors.paidAt && (
             <span className="text-red-500 text-xs">
@@ -210,8 +215,9 @@ export default function TransactionForm({
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
-            }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.accountId ? "border-red-500" : "border-slate-300"
+          }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -245,8 +251,9 @@ export default function TransactionForm({
         <select
           id="category"
           {...register("category")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.category ? "border-red-500" : "border-slate-300"
-            }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.category ? "border-red-500" : "border-slate-300"
+          }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -281,8 +288,9 @@ export default function TransactionForm({
           type="text"
           id="description"
           {...register("description")}
-          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.description ? "border-red-500" : "border-slate-300"
-            }`}
+          className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.description ? "border-red-500" : "border-slate-300"
+          }`}
         />
         {errors.description && (
           <span className="text-red-500 text-xs">
@@ -291,22 +299,11 @@ export default function TransactionForm({
         )}
       </div>
 
-      {/* <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={modal?.close}
-          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-white text-sm cursor-pointer"
-        >
-          Save
-        </button>
-      </div> */}
+      {actions && actions?.length > 0 && (
+        <div className="flex justify-end gap-3">
+          {actions.map((action) => action)}
+        </div>
+      )}
     </form>
   );
 
@@ -325,8 +322,9 @@ export default function TransactionForm({
         <select
           id="accountId"
           {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${errors.accountId ? "border-red-500" : "border-slate-300"
-            }`}
+          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
+            errors.accountId ? "border-red-500" : "border-slate-300"
+          }`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -360,7 +358,6 @@ export default function TransactionForm({
             <h4 className="my-2 font-bold text-gray-500">
               Scanned Transactions
             </h4>
-
           </>
         )}
       </div>

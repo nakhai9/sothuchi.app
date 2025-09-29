@@ -1,14 +1,23 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { ChevronDown, LayoutDashboard, LogOut } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import {
+  ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  UserCog,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { Utils } from "@/lib/utils";
-import { useGlobalStore } from "@/store/globalStore";
+import { Utils } from '@/lib/utils';
+import { useGlobalStore } from '@/store/globalStore';
 
-import Breadcrumb from "./Breadcrumb";
+import Breadcrumb from './Breadcrumb';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -73,20 +82,21 @@ export default function PageLayout({
               className="flex items-center gap-2 p-2 rounded-lg transition-colors cursor-pointer"
               onClick={toggleDropdown}
             >
-              <div className="flex flex-col justify-center text-gray-700">
+              <div className="hidden md:block flex flex-col justify-center text-gray-700">
                 <p className="font-bold">{userInfo?.fullName}</p>
                 <span className="text-xs">{userInfo?.email}</span>
               </div>
               <div className="flex justify-center items-center bg-white/10 border border-slate-200 rounded-full w-10 h-10">
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-gray-500">
                   {userInfo?.fullName &&
                     Utils.text.getInitial(userInfo?.fullName)}
                 </span>
               </div>
 
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""
-                  }`}
+                className={`w-4 h-4 transition-transform ${
+                  isDropdownOpen ? "rotate-180" : ""
+                }`}
               />
             </div>
 
@@ -108,6 +118,13 @@ export default function PageLayout({
                     <span>Categories</span>
                     <LayoutDashboard size={16} />
                   </Link>
+                  <Link
+                    href="/settings"
+                    className="flex justify-between items-center gap-2 hover:bg-amber-400 px-4 py-2 text-sm cursor-pointer"
+                  >
+                    <span>Settings</span>
+                    <UserCog size={16} />
+                  </Link>
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -126,7 +143,9 @@ export default function PageLayout({
         <Breadcrumb />
         <div className="flex justify-between items-center gap-1 mb-6">
           <div>
-            <h1 className="font-bold text-gray-600 text-3xl">{title}</h1>
+            <h2 className="font-bold text-gray-600 text-lg md:text-3xl">
+              {title}
+            </h2>
             <p className="text-gray-500 text-sm">{description}</p>
           </div>
           {actions && actions.length > 0 && (

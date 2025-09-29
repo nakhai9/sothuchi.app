@@ -22,48 +22,11 @@ import {
   Modal,
   PageLayout,
   TransactionForm,
+  TransactionItems,
 } from '../components';
 import {
-  DataGrid,
   IconButton,
 } from '../ui';
-
-const columns = [
-  {
-    title: "Category",
-    field: "category" as const,
-    cellRender: (row: TransactionModel & BaseEntity) => {
-      return (
-        <div className="relative w-8 h-8">
-          <Image
-            src={CATEGORIES.find((x) => x.value === row.category)?.icon ?? ""}
-            alt=""
-            fill
-            className="object-contain"
-          />
-        </div>
-      );
-    },
-  },
-  { title: "Description", field: "description" as const },
-  {
-    title: "Amount",
-    field: "amountFormatted" as const,
-    cellRender: (row: TransactionModel & BaseEntity) => (
-      <div
-        className={clsx(
-          row.type === "expense" ? "text-red-600" : "text-green-600"
-        )}
-      >
-        {row.amountFormatted}
-      </div>
-    ),
-  },
-  {
-    title: "Paid at",
-    field: "paidAtFormatted" as const,
-  },
-];
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<
@@ -123,8 +86,7 @@ export default function Transactions() {
       description="Manage your daily spending by adding, editing, and tracking transactions here."
       actions={actions}
     >
-      <DataGrid columns={columns} data={transactions} />
-
+      <TransactionItems transactions={transactions} />
       <Modal
         isOpen={modal.isOpen}
         onClose={modal.close}

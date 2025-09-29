@@ -8,16 +8,11 @@ import {
 import clsx from 'clsx';
 import {
   CirclePlus,
-  Repeat,
   Trash,
-  TrendingDown,
-  TrendingUp,
 } from 'lucide-react';
-import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 import { useModal } from '@/hooks';
-import { CATEGORIES } from '@/lib/constants/categories';
 import { Utils } from '@/lib/utils';
 import { SERVICES } from '@/services/service';
 import { useGlobalStore } from '@/store/globalStore';
@@ -32,49 +27,12 @@ import {
   Modal,
   PageLayout,
   TransactionForm,
+  TransactionItems,
 } from '../components';
 import AccountForm from '../components/Forms/AccountForm';
 import {
-  DataGrid,
   IconButton,
 } from '../ui';
-
-const columns = [
-  {
-    title: "Category",
-    field: "category" as const,
-    cellRender: (row: TransactionModel & BaseEntity) => {
-      return (
-        <div className="relative w-8 h-8">
-          <Image
-            src={CATEGORIES.find((x) => x.value === row.category)?.icon ?? ""}
-            alt=""
-            fill
-            className="object-contain"
-          />
-        </div>
-      );
-    },
-  },
-  { title: "Description", field: "description" as const },
-  {
-    title: "Amount",
-    field: "amountFormatted" as const,
-    cellRender: (row: TransactionModel & BaseEntity) => (
-      <div
-        className={clsx(
-          row.type === "expense" ? "text-red-600" : "text-green-600"
-        )}
-      >
-        {row.amountFormatted}
-      </div>
-    ),
-  },
-  {
-    title: "Paid at",
-    field: "paidAtFormatted" as const,
-  },
-];
 
 enum ModalName {
   Account = "account",
@@ -252,62 +210,39 @@ export default function Account() {
         </div>
         <div className="flex flex-col flex-1 gap-4">
           {accounts.length > 0 && (
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-gray-600 p-4 bg-white rounded-md shadow-lg">
-                <div className="text-gray-600 flex font-semibold items-center gap-2">
-                  Total Income
-                  <span className="text-green-600">
-                    <TrendingUp size={20} />
-                  </span>
-                </div>
-                <p className="text-xl font-bold">
+            <div className="gap-4 grid grid-cols-3">
+              <div className="bg-white shadow-lg p-4 rounded-md">
+                <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
+                  <div className='bg-green-500 rounded-full w-3 h-3'></div> Total Income
+                </h4>
+                <p className="font-bold text-gray-600 md:text-xl text:sm">
                   {Utils.currency.format(report?.totalIncome ?? 0)}
                 </p>
               </div>
-              <div className="text-gray-600 p-4 bg-white rounded-md shadow-lg">
-                <div className="text-gray-600 flex font-semibold items-center gap-2">
-                  Total Expense
-                  <span className="text-red-600">
-                    <TrendingDown size={20} />
-                  </span>
-                </div>
-                <p className="text-xl font-bold">
+              <div className="bg-white shadow-lg p-4 rounded-md">
+                <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
+                  <div className='bg-red-500 rounded-full w-3 h-3'></div> Total Expense
+                </h4>
+                <p className="font-bold text-gray-600 md:text-xl text:sm">
                   {Utils.currency.format(report?.totalExpense ?? 0)}
                 </p>
               </div>
-              <div className="text-gray-600 p-4 bg-white rounded-md shadow-lg">
-                <div className="text-gray-600 flex font-semibold items-center gap-2">
-                  Balance
-                  <span className="text-blue-600">
-                    <Repeat size={20} />
-                  </span>
-                </div>
-                <p className="text-xl font-bold">
+              <div className="bg-white shadow-lg p-4 rounded-md">
+                <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
+                  <div className='bg-blue-500 rounded-full w-3 h-3'></div> Balance
+                </h4>
+                <p className="font-bold text-gray-600 md:text-xl text:sm">
                   {Utils.currency.format(report?.balance ?? 0)}
                 </p>
               </div>
             </div>
           )}
-          <div className="flex flex-col flex-1 bg-white shadow-lg rounded-md">
-            <div className="flex justify-between items-center px-4 py-2 border border-slate-100">
-              <h5 className="font-medium text-gray-700 text-lg">
-                Transaction History
-              </h5>
-              {accounts.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => handleOpenModal(ModalName.Transaction)}
-                  className="bg-slate-100 hover:bg-slate-50 px-4 py-1 border border-slate-300 rounded font-medium text-sm cursor-pointer"
-                >
-                  Add new transaction
-                </button>
-              )}
-            </div>
-            <div className="flex-1 p-4">
-              {accounts.length > 0 && (
-                <DataGrid columns={columns} data={transactions} />
-              )}
-            </div>
+          <div className="space-y-4">
+            <h3 className='font-semibold text-gray-500 text-xl'>
+              Transaction History
+            </h3>
+            {accounts.length > 0 && <TransactionItems transactions={transactions} />}
+
           </div>
         </div>
       </div>

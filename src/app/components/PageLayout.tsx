@@ -27,7 +27,6 @@ export default function PageLayout({
   const userInfo = useGlobalStore((state) => state.userInfo);
   const clearUserInfo = useGlobalStore((state) => state.clearUserInfo);
   const isLoading = useGlobalStore((state) => state.isLoading);
-  const setLoading = useGlobalStore((state) => state.setLoading);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -61,13 +60,13 @@ export default function PageLayout({
 
   return (
     <div className="relative min-h-screen">
-      <div className="bg-amber-500 w-full">
+      <div className="shadow w-full">
         <div className="flex justify-between items-center mx-auto px-4 max-w-6xl h-14">
           <Link
             href="/dashboard"
-            className="font-medium text-gray-700 text-3xl"
+            className="font-medium text-amber-500 text-3xl logo"
           >
-            Sothuchi
+            sochiti app
           </Link>
           <div className="relative" ref={dropdownRef}>
             <div
@@ -86,9 +85,8 @@ export default function PageLayout({
               </div>
 
               <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  isDropdownOpen ? "rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""
+                  }`}
               />
             </div>
 

@@ -18,7 +18,6 @@ import z from 'zod';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { DataGrid } from '@/app/ui';
 import { UseModalReturn } from '@/hooks/useModal';
 import { CATEGORIES } from '@/lib/constants/categories';
 import { SERVICES } from '@/services/service';
@@ -108,7 +107,6 @@ export default function TransactionForm({
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
-
       modal?.close();
     }
   };
@@ -136,7 +134,7 @@ export default function TransactionForm({
         )}
         onClick={() => setType("expense")}
       >
-        <TrendingUp size={14} />
+        <TrendingDown className='text-red-600' size={14} />
         Expense
       </button>
       <button
@@ -147,18 +145,19 @@ export default function TransactionForm({
         )}
         onClick={() => setType("income")}
       >
-        <TrendingDown size={14} />
+
+        <TrendingUp className='text-green-600' size={14} />
         Income
       </button>
     </div>
   );
 
   const ManualForm = () => (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex justify-center items-center gap-5">
         <SwitchType />
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-1 w-full">
           <label
             htmlFor="amount"
@@ -292,7 +291,7 @@ export default function TransactionForm({
         )}
       </div>
 
-      <div className="flex justify-end gap-3">
+      {/* <div className="flex justify-end gap-3">
         <button
           type="button"
           onClick={modal?.close}
@@ -307,7 +306,7 @@ export default function TransactionForm({
         >
           Save
         </button>
-      </div>
+      </div> */}
     </form>
   );
 
@@ -361,7 +360,7 @@ export default function TransactionForm({
             <h4 className="my-2 font-bold text-gray-500">
               Scanned Transactions
             </h4>
-            <DataGrid columns={columns} data={data} />
+
           </>
         )}
       </div>
@@ -385,7 +384,7 @@ export default function TransactionForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex">
+      {/* <div className="flex">
         <button
           className={clsx(
             "px-6 py-2 border-slate-700 w-full font-bold text-sm cursor-pointer",
@@ -406,8 +405,8 @@ export default function TransactionForm({
         >
           From bill image
         </button>
-      </div>
-      {mode === "manual" ? <ManualForm /> : <BillForm />}
+      </div> */}
+      <ManualForm />
     </div>
   );
 }

@@ -5,17 +5,11 @@ import {
   useState,
 } from 'react';
 
-import clsx from 'clsx';
 import {
-  CirclePlus,
-  ReceiptText,
   WalletMinimal,
 } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
-import { useModal } from '@/hooks';
-import { CATEGORIES } from '@/lib/constants/categories';
 import { Utils } from '@/lib/utils';
 import { SERVICES } from '@/services/service';
 import { useGlobalStore } from '@/store/globalStore';
@@ -26,52 +20,14 @@ import {
 } from '@/types/transaction';
 
 import {
-  Modal,
   PageLayout,
   TransactionForm,
+  TransactionItems,
 } from '../components';
 import {
-  DataGrid,
   IconButton,
 } from '../ui';
 import Link from 'next/link';
-
-const columns = [
-  {
-    title: "Category",
-    field: "category" as const,
-    cellRender: (row: TransactionModel & BaseEntity) => {
-      return (
-        <div className="relative w-8 h-8">
-          <Image
-            src={CATEGORIES.find((x) => x.value === row.category)?.icon ?? ""}
-            alt=""
-            fill
-            className="object-contain"
-          />
-        </div>
-      );
-    },
-  },
-  { title: "Description", field: "description" as const },
-  {
-    title: "Amount",
-    field: "amountFormatted" as const,
-    cellRender: (row: TransactionModel & BaseEntity) => (
-      <div
-        className={clsx(
-          row.type === "expense" ? "text-red-600" : "text-green-600"
-        )}
-      >
-        {row.amountFormatted}
-      </div>
-    ),
-  },
-  {
-    title: "Paid at",
-    field: "paidAtFormatted" as const,
-  },
-];
 
 export default function Dashboard() {
   const router = useRouter();
@@ -134,41 +90,59 @@ export default function Dashboard() {
       actions={actions}
     >
       {/* Financial Overview Panels */}
-      <div className="gap-6 grid grid-cols-1 md:grid-cols-2 mb-8">
+      <div className="gap-4 grid grid-cols-2 mb-8">
         {/* Total Income Panel */}
-        <div className="bg-white shadow-sm p-6 border-green-500 border-l-4 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-600 text-sm">Total Income</p>
-            <p className="font-bold text-gray-900 text-2xl">
-              {Utils.currency.format(report?.totalIncome ?? 0)}
-            </p>
+        <div className="bg-white shadow-lg p-4 rounded-md">
+          <div className='flex items-center gap-2'>
+            <div className='bg-green-500 rounded-full w-3 h-3'></div>
+            <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
+              Total Income
+            </h4>
           </div>
+          <p className="font-bold text-gray-600 md:text-xl text:sm">
+            {Utils.currency.format(report?.totalIncome ?? 0)}
+          </p>
         </div>
 
+
         {/* Total Expenses Panel */}
-        <div className="bg-white shadow-sm p-6 border-red-500 border-l-4 rounded-lg">
-          <div>
-            <p className="font-medium text-gray-600 text-sm">Total Expenses</p>
-            <p className="font-bold text-gray-900 text-2xl">
-              {Utils.currency.format(report?.totalExpense ?? 0)}
-            </p>
+        <div className="bg-white shadow-lg p-4 rounded-md">
+          <div className='flex items-center gap-2'>
+            <div className='bg-red-500 rounded-full w-3 h-3'></div>
+            <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
+              Total Expense
+            </h4>
           </div>
+          <p className="font-bold text-gray-600 md:text-xl text:sm">
+            {Utils.currency.format(report?.totalExpense ?? 0)}
+          </p>
         </div>
+
       </div>
 
       {/* Additional Dashboard Content */}
-      <div className='flex gap-6'>
-        <div className='bg-white shadow-lg p-4 rounded-md w-96'>
-          <TransactionForm />
-        </div>
-        <div className="flex-1 bg-white shadow-sm p-6 rounded-lg">
-          <div className='flex justify-between items-center mb-2'>
-            <h2 className="font-medium text-gray-600 text-lg">
-              Recent Activity
-            </h2>
-            <Link href="/transactions" className='font-bold text-blue-600 hover:text-blue-400 text-sm'>See all</Link>
+      <div className='flex md:flex-row flex-col gap-4'>
+        <div className='w-full md:w-64'>
+          <h3 className='mb-2 font-medium text-gray-500 text-lg'>
+            Add New Transaction
+          </h3>
+          <div className='bg-white shadow p-4 rounded'>
+            <TransactionForm />
+            <button type='button'>
+              Add
+            </button>
           </div>
-          <DataGrid data={transactions} columns={columns} />
+        </div>
+        <div className="flex-1">
+          <div className='flex justify-between items-center mb-2'>
+            <h3 className='font-medium text-gray-500 text-lg'>
+              Recent Activity
+            </h3>
+            <Link href="/transactions" className='font-bold text-gray-400 hover:text-gray-300 text-sm'>See all</Link>
+          </div>
+          <div className=''>
+            <TransactionItems transactions={transactions} />
+          </div>
         </div>
 
       </div>

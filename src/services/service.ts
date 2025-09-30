@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 import { Utils } from '@/lib/utils';
 import {
   AccountModel,
@@ -20,8 +23,6 @@ import {
   UserSignUp,
   UserToken,
 } from '@/types/user';
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 import { httpService } from '../lib/config/httpService';
 
@@ -124,6 +125,25 @@ export const SERVICES = {
           `${BASE_URLS.accounts}/${id}/report`
         );
         return data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    getAccountById: async (
+      id: number
+    ): Promise<(AccountModel & BaseEntity) | undefined> => {
+      try {
+        const { data } = await httpService.get<
+          ResponseBase<AccountModel & BaseEntity>
+        >(`${BASE_URLS.accounts}/${id}`);
+        return data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    update: async (id: number, payload: AccountModel): Promise<void> => {
+      try {
+        await httpService.put(`${BASE_URLS.accounts}/${id}`, payload);
       } catch (error) {
         console.log(error);
       }

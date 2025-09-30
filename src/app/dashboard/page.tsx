@@ -89,7 +89,7 @@ export default function Dashboard() {
       type="submit"
       className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 w-full font-medium text-white text-sm cursor-pointer"
     >
-      Add
+      Add Transaction
     </button>,
   ];
 

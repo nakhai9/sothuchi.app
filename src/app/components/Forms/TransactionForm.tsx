@@ -1,31 +1,22 @@
 "use client";
-import {
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect, useState } from "react";
 
-import clsx from 'clsx';
-import {
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react';
-import {
-  SubmitHandler,
-  useForm,
-} from 'react-hook-form';
-import toast from 'react-hot-toast';
-import z from 'zod';
+import clsx from "clsx";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import z from "zod";
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { UseModalReturn } from '@/hooks/useModal';
-import { CATEGORIES } from '@/lib/constants/categories';
-import { SERVICES } from '@/services/service';
-import { useGlobalStore } from '@/store/globalStore';
-import { DropdownOption } from '@/types/base';
-import { ReceiptTransaction } from '@/types/transaction';
+import { UseModalReturn } from "@/hooks/useModal";
+import { CATEGORIES } from "@/lib/constants/categories";
+import { SERVICES } from "@/services/service";
+import { useGlobalStore } from "@/store/globalStore";
+import { DropdownOption } from "@/types/base";
+import { ReceiptTransaction } from "@/types/transaction";
 
-import FileUploadZone from '../FileUploadZone';
+import FileUploadZone from "../FileUploadZone";
 
 const transactionSchema = z.object({
   amount: z.number().min(1, "Amount is required"),
@@ -41,6 +32,7 @@ type TransactionFormProps = {
   modal?: UseModalReturn;
   onSuccess?: () => void;
   actions?: React.ReactNode[];
+  formData?: Partial<TransactionFormData>;
 };
 
 const columns = [
@@ -53,6 +45,7 @@ export default function TransactionForm({
   modal,
   onSuccess,
   actions,
+  formData,
 }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +63,7 @@ export default function TransactionForm({
     defaultValues: {
       amount: 0,
       description: "",
-      accountId: "",
+      accountId: formData?.accountId || "",
       paidAt: new Date().toISOString().slice(0, 10),
       category: "",
     },

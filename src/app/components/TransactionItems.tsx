@@ -13,6 +13,10 @@ export default function TransactionItems({
 }: TransactionItemsProps) {
   return (
     <div className="flex flex-col gap-2">
+      {transactions.length === 0 && (
+        <p className="text-gray-500 text-center">No transactions found.</p>
+      )}
+
       {transactions.map((x: any) => (
         <div
           key={x.id}
@@ -38,7 +42,7 @@ export default function TransactionItems({
               <div className="text-gray-500 text-xs">{x.paidAtFormatted}</div>
             </div>
           </div>
-          <div className="flex items-center text-right">
+          <div className="flex flex-col items-center text-right">
             <p
               className={clsx(
                 "font-medium text-lg",
@@ -47,12 +51,21 @@ export default function TransactionItems({
             >
               {x.amountFormatted}
             </p>
-            <button
-              type="button"
-              className="hidden text-blue-500 text-sm hover:underline cursor-pointer"
-            >
-              Delete
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className="text-blue-500 text-sm hover:underline cursor-pointer"
+              >
+                Edit
+              </button>
+              |
+              <button
+                type="button"
+                className="text-red-500 text-sm hover:underline cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       ))}

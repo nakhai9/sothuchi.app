@@ -1,23 +1,14 @@
 "use client";
-import {
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useEffect, useRef, useState } from "react";
 
-import {
-  ChevronDown,
-  LayoutDashboard,
-  LogOut,
-  UserCog,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { ChevronDown, LayoutDashboard, LogOut, UserCog } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { Utils } from '@/lib/utils';
-import { useGlobalStore } from '@/store/globalStore';
+import { Utils } from "@/lib/utils";
+import { useGlobalStore } from "@/store/globalStore";
 
-import Breadcrumb from './Breadcrumb';
+import Breadcrumb from "./Breadcrumb";
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -73,16 +64,16 @@ export default function PageLayout({
         <div className="flex justify-between items-center mx-auto px-4 max-w-6xl h-14">
           <Link
             href="/dashboard"
-            className="font-medium text-amber-500 text-3xl logo"
+            className="font-medium text-amber-600 text-3xl logo"
           >
-            sochiti app
+            sothuchi app
           </Link>
           <div className="relative" ref={dropdownRef}>
             <div
               className="flex items-center gap-2 p-2 rounded-lg transition-colors cursor-pointer"
               onClick={toggleDropdown}
             >
-              <div className="hidden md:block flex flex-col justify-center text-gray-700">
+              <div className="hidden md:block flex flex-col justify-center text-gray-500">
                 <p className="font-bold">{userInfo?.fullName}</p>
                 <span className="text-xs">{userInfo?.email}</span>
               </div>

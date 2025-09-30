@@ -147,6 +147,20 @@ export const CATEGORIES: Category[] = [
     value: "saving",
   },
   {
+    id: 23,
+    name: "Transfer In",
+    icon: "https://www.svgrepo.com/show/293320/transactions-transaction.svg",
+    type: "income",
+    value: "transfer_in",
+  },
+  {
+    id: 24,
+    name: "Transfer Out",
+    icon: "https://www.svgrepo.com/show/293318/transactions-transaction.svg",
+    type: "expense",
+    value: "transfer_out",
+  },
+  {
     id: 9998,
     name: "Income Default",
     icon: "https://www.svgrepo.com/show/230377/money-bag-money.svg",
@@ -162,4 +176,4 @@ export const CATEGORIES: Category[] = [
   },
 ];
 
-export const USER_CURRENCY = "USD";
+export const USER_CURRENCY = "VND";

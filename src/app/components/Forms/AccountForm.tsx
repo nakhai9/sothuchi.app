@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
+import { useEffect } from 'react';
 
 import {
   SubmitHandler,
@@ -15,7 +18,7 @@ import { useGlobalStore } from '@/store/globalStore';
 
 const accountSchema = z.object({
   name: z.string().nonempty("Name is required"),
-  amount: z.coerce.number().positive("Amount must be greater than 0"),
+  amount: z.coerce.number(),
 });
 
 type AccountFormData = z.infer<typeof accountSchema>;
@@ -23,8 +26,13 @@ type AccountFormData = z.infer<typeof accountSchema>;
 type AccountFormProps = {
   modal: UseModalReturn;
   onSuccess?: () => void;
+  formData?: any;
 };
-export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
+export default function AccountForm({
+  modal,
+  onSuccess,
+  formData,
+}: AccountFormProps) {
   const {
     register,
     handleSubmit,
@@ -43,19 +51,33 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
   ) => {
     setLoading(true);
     try {
-      await SERVICES.AccountService.create({
-        ...data,
-      });
+      reset();
+
+      if (formData?.id) {
+        await SERVICES.AccountService.update(formData.id as number, data);
+      } else {
+        await SERVICES.AccountService.create({
+          ...data,
+        });
+      }
     } catch (error) {
       toast.error("Failed to create account");
     } finally {
-      reset();
       setLoading(false);
       modal?.close();
       toast.success("Account created successfully");
       onSuccess?.();
     }
   };
+
+  useEffect(() => {
+    if (modal.isOpen) {
+      reset({
+        name: formData?.name || "",
+        amount: formData?.amount || 0,
+      });
+    }
+  }, [modal.isOpen, formData, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -78,13 +100,14 @@ export default function AccountForm({ modal, onSuccess }: AccountFormProps) {
           htmlFor="amount"
           className="block font-bold text-gray-800 text-sm"
         >
-          Amount
+          Amount (You can not edit this field later)
         </label>
         <input
           type="number"
           id="amount"
+          disabled={Boolean(formData?.id)}
           {...register("amount", { valueAsNumber: true })}
-          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
+          className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm disable:no-drop"
         />
         {errors.amount && (
           <p className="text-red-500 text-xs">{errors.amount.message}</p>

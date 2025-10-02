@@ -6,8 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
-import { AuthLayout } from "@/app/components";
 import { SERVICES } from "@/services/service";
+import AuthLayout from "@/shared/components/AuthLayout";
 import { useGlobalStore } from "@/store/globalStore";
 
 export default function SignInPage() {

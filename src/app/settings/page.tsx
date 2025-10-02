@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 "use client";
 
-import { PageLayout } from '../components';
+import { PageLayout } from "@/shared/components";
 
 type SettingsPageProps = {};
 export default function Settings() {

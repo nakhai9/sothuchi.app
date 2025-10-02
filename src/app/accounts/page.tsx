@@ -7,15 +7,25 @@ import {
 
 import clsx from 'clsx';
 import {
-  CirclePlus,
-  SquarePen,
-  Trash,
+  CircleArrowDown,
+  CircleArrowUp,
+  CircleDollarSign,
+  Plus,
+  SquarePlus,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { useModal } from '@/hooks';
-import { Utils } from '@/lib/utils';
 import { SERVICES } from '@/services/service';
+import {
+  Modal,
+  PageLayout,
+  TransactionForm,
+  TransactionItems,
+} from '@/shared/components';
+import AccountForm from '@/shared/components/Forms/AccountForm';
+import { IconButton } from '@/shared/components/ui';
+import { Utils } from '@/shared/lib/utils';
 import { useGlobalStore } from '@/store/globalStore';
 import {
   AccountModel,
@@ -23,15 +33,6 @@ import {
 } from '@/types/account';
 import { BaseEntity } from '@/types/base';
 import { TransactionModel } from '@/types/transaction';
-
-import {
-  Modal,
-  PageLayout,
-  TransactionForm,
-  TransactionItems,
-} from '../components';
-import AccountForm from '../components/Forms/AccountForm';
-import { IconButton } from '../ui';
 
 enum ModalName {
   Account = "account",
@@ -67,17 +68,6 @@ export default function Account() {
       deleteAccount(id);
     },
   };
-
-  const actions = [
-    <IconButton
-      type="button"
-      key="add-account"
-      icon={<CirclePlus size={20} />}
-      onClick={accountActions.create}
-      size="md"
-      title="Add account"
-    />,
-  ];
 
   const formActions = [
     <button
@@ -210,104 +200,104 @@ export default function Account() {
     <PageLayout
       title="Accounts"
       description="Manage your accounts with ease – add, edit, and monitor balances for better money control."
-      actions={actions}
     >
-      <div className="flex md:flex-row flex-col gap-4 md:gap-8">
-        <div className="flex flex-col bg-white shadow-lg rounded-md w-full md:w-80 h-80">
-          <div className="px-4 py-2 border border-slate-100 font-medium text-gray-600 text-lg">
-            Your accounts
-          </div>
-          <div className="flex flex-col overflow-auto">
+      <div className="flex md:flex-row flex-col gap-4">
+        <div className="space-y-4 w-full md:w-66">
+          <div className="bg-white shadow-lg rounded-md overflow-hidden">
+            <div className="flex justify-between items-center px-3 py-2 border-slate-200 border-b">
+              <h3 className="font-medium text-gray-600 text-lg">
+                Your accounts
+              </h3>
+              <IconButton
+                type="button"
+                key="add-account"
+                icon={<Plus size={16} />}
+                onClick={accountActions.create}
+                size="sm"
+                title="Add account"
+              />
+            </div>
             {accounts.length ? (
               accounts.map((account) => (
                 <div
                   key={account.id}
                   onClick={() => selectAccount(account)}
                   className={clsx(
-                    `group flex justify-between items-center hover:bg-amber-400 px-4 py-2 border-slate-200 border-b cursor-pointer`,
-                    account.id === selectedAccount?.id && "bg-amber-300"
+                    `group flex flex-col justify-between hover:bg-gray-100 px-4 py-2 cursor-pointer`,
+                    account.id === selectedAccount?.id && "bg-gray-200"
                   )}
                 >
-                  <div>
-                    <p className="group-hover:text-white">{account.name}</p>
-                    <span className="text-gray-700 group-hover:text-white text-lg">
-                      {account.amountFormatted}
-                    </span>
+                  <div className="text-gray-700">
+                    <p className="">{account.name}</p>
+                    <span className="text-xl">{account.amountFormatted}</span>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="flex justify-center items-center hover:bg-blue-100 rounded-full w-8 h-8 text-blue-600 cursor-pointer"
+                      className="text-blue-600 hover:text-blue-500 text-xs cursor-pointer"
                       onClick={() => accountActions.edit(account.id as number)}
                     >
-                      <SquarePen size={16} />
+                      Detail
                     </button>
+                    |
                     <button
                       onClick={() => accountActions.delete(account.id!)}
                       type="button"
-                      className="flex justify-center items-center hover:bg-red-100 rounded-full w-8 h-8 text-red-600 cursor-pointer"
+                      className="text-red-600 hover:text-red-500 text-xs cursor-pointer"
                     >
-                      <Trash size={16} />
+                      Delete
                     </button>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-4 text-gray-500 text-center">No data</div>
+              <div className="p-4">
+                <p className="text-gray-400 text-center">No Accounts Found</p>
+              </div>
             )}
           </div>
         </div>
-        <div className="flex flex-col flex-1 gap-4">
-          {accounts.length > 0 && (
-            <div className="gap-4 grid grid-cols-3">
-              <div className="bg-white shadow-lg p-4 rounded-md">
-                <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-                  <div className="bg-green-500 rounded-full w-3 h-3"></div>{" "}
-                  Total Income
-                </h4>
-                <p className="font-bold text-gray-600 md:text-xl text:sm">
-                  {Utils.currency.format(report?.totalIncome ?? 0)}
-                </p>
-              </div>
-              <div className="bg-white shadow-lg p-4 rounded-md">
-                <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-                  <div className="bg-red-500 rounded-full w-3 h-3"></div> Total
-                  Expense
-                </h4>
-                <p className="font-bold text-gray-600 md:text-xl text:sm">
-                  {Utils.currency.format(report?.totalExpense ?? 0)}
-                </p>
-              </div>
-              <div className="bg-white shadow-lg p-4 rounded-md">
-                <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-                  <div className="bg-blue-500 rounded-full w-3 h-3"></div>{" "}
-                  Balance
-                </h4>
-                <p className="font-bold text-gray-600 md:text-xl text:sm">
-                  {Utils.currency.format(report?.balance ?? 0)}
-                </p>
-              </div>
-            </div>
-          )}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium text-gray-500 text-lg">
+
+        <div className="flex-1">
+          <div className="bg-white shadow-lg rounded-md">
+            <div className="flex justify-between items-center mb-3 px-3 py-2 border-slate-200 border-b">
+              <h3 className="font-medium text-gray-600 text-lg">
                 Transaction History
               </h3>
               {accounts.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => handleOpenModal(ModalName.Transaction)}
-                  className="bg-white hover:bg-slate-50 px-4 py-1 border border-slate-300 rounded font-medium text-sm cursor-pointer"
-                >
-                  Add new transaction
-                </button>
+                <div>
+                  <IconButton
+                    icon={<SquarePlus size={16} />}
+                    type="button"
+                    className="text-amber-500"
+                    size="sm"
+                    onClick={() => handleOpenModal(ModalName.Transaction)}
+                  />
+                </div>
               )}
             </div>
-            <div className="max-h-[400px] overflow-auto">
-              {accounts.length > 0 && (
-                <TransactionItems transactions={transactions} />
-              )}
+            <div className="grid md:grid-cols-3 px-3 py-2">
+              <div className="flex items-center gap-2 text-lg">
+                <CircleArrowDown className="bg-green-500 rounded-full text-white" />
+                <span className="text-gray-600">
+                  {Utils.currency.format(report?.totalIncome ?? 0)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-lg">
+                <CircleArrowUp className="bg-rose-500 rounded-full text-white" />
+                <span className="text-gray-600">
+                  {Utils.currency.format(report?.totalExpense ?? 0)}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-lg">
+                <CircleDollarSign className="bg-blue-500 rounded-full text-white" />
+                <span className="text-gray-600">
+                  {Utils.currency.format(report?.balance ?? 0)}
+                </span>
+              </div>
+            </div>
+            <div className="px-3 py-4 overflow-auto">
+              <TransactionItems transactions={transactions} />
             </div>
           </div>
         </div>

@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import clsx from 'clsx';
+import { ReceiptText } from 'lucide-react';
 import Image from 'next/image';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { CATEGORIES } from '@/lib/constants/categories';
+import { CATEGORIES } from '@/shared/lib/constants/categories';
 
 type TransactionItemsProps = {
   transactions: any;
@@ -14,13 +15,23 @@ export default function TransactionItems({
   return (
     <div className="flex flex-col gap-2">
       {transactions.length === 0 && (
-        <p className="text-gray-500 text-center">No transactions found.</p>
+        <div className="flex flex-col justify-center items-center gap-2 text-gray-500">
+          <div className="">
+            <ReceiptText size={40} />
+          </div>
+          <div>
+            <p className="text-lg text-center">No transactions found</p>
+            <p className="text-gray-400 text-center">
+              Start by adding your first transaction
+            </p>
+          </div>
+        </div>
       )}
 
       {transactions.map((x: any) => (
         <div
           key={x.id}
-          className="flex justify-between bg-white shadow-lg px-4 py-2 rounded-md"
+          className="flex justify-between bg-white px-4 py-2 border hover:border-amber-800 border-transparent hover:border-dashed rounded-md"
         >
           <div className="flex items-center gap-3">
             <div

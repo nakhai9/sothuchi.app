@@ -1,22 +1,31 @@
 "use client";
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from 'react';
 
-import clsx from "clsx";
-import { TrendingDown, TrendingUp } from "lucide-react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import z from "zod";
+import clsx from 'clsx';
+import {
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
+import {
+  SubmitHandler,
+  useForm,
+} from 'react-hook-form';
+import toast from 'react-hot-toast';
+import z from 'zod';
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import { UseModalReturn } from "@/hooks/useModal";
-import { CATEGORIES } from "@/lib/constants/categories";
-import { SERVICES } from "@/services/service";
-import { useGlobalStore } from "@/store/globalStore";
-import { DropdownOption } from "@/types/base";
-import { ReceiptTransaction } from "@/types/transaction";
+import { UseModalReturn } from '@/hooks/useModal';
+import { SERVICES } from '@/services/service';
+import { CATEGORIES } from '@/shared/lib/constants/categories';
+import { useGlobalStore } from '@/store/globalStore';
+import { DropdownOption } from '@/types/base';
+import { ReceiptTransaction } from '@/types/transaction';
 
-import FileUploadZone from "../FileUploadZone";
+import FileUploadZone from '../FileUploadZone';
 
 const transactionSchema = z.object({
   amount: z.number().min(1, "Amount is required"),
@@ -215,17 +224,12 @@ export default function TransactionForm({
           <option value="" disabled hidden>
             - Select -
           </option>
-          {accountOptions.length ? (
+          {accountOptions.length &&
             accountOptions.map((x) => (
               <option key={x.value} value={x.value}>
                 {x.label}
               </option>
-            ))
-          ) : (
-            <option key="other" value="0">
-              Other
-            </option>
-          )}
+            ))}
         </select>
         {errors.accountId && (
           <span className="text-red-500 text-xs">
@@ -251,17 +255,12 @@ export default function TransactionForm({
           <option value="" disabled hidden>
             - Select -
           </option>
-          {CATEGORIES.length ? (
+          {CATEGORIES.length &&
             CATEGORIES.filter((x) => x.type === type).map((x) => (
               <option key={x.id} value={x.value}>
                 {x.name}
               </option>
-            ))
-          ) : (
-            <option key="other" value="0">
-              Other
-            </option>
-          )}
+            ))}
         </select>
         {errors.accountId && (
           <span className="text-red-500 text-xs">
@@ -322,17 +321,12 @@ export default function TransactionForm({
           <option value="" disabled hidden>
             - Select -
           </option>
-          {accountOptions.length ? (
+          {accountOptions.length &&
             accountOptions.map((x) => (
               <option key={x.value} value={x.value}>
                 {x.label}
               </option>
-            ))
-          ) : (
-            <option key="other" value="0">
-              Other
-            </option>
-          )}
+            ))}
         </select>
         {errors.accountId && (
           <span className="text-red-500 text-xs">

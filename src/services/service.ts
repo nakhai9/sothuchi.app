@@ -1,30 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-import { Utils } from '@/lib/utils';
-import {
-  AccountModel,
-  AccountReport,
-} from '@/types/account';
-import {
-  BaseEntity,
-  DropdownOption,
-  ResponseBase,
-} from '@/types/base';
-import { CategoryModel } from '@/types/category';
+import { Utils } from "@/shared/lib/utils";
+import { AccountModel, AccountReport } from "@/types/account";
+import { BaseEntity, DropdownOption, ResponseBase } from "@/types/base";
+import { CategoryModel } from "@/types/category";
 import {
   ReceiptTransaction,
   TransactionModel,
   TransactionReport,
-} from '@/types/transaction';
-import {
-  UserInfo,
-  UserLogin,
-  UserSignUp,
-  UserToken,
-} from '@/types/user';
+} from "@/types/transaction";
+import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/types/user";
 
-import { httpService } from '../lib/config/httpService';
+import { httpService } from "../shared/lib/config/httpService";
 
 const API_PREFIX = "api/v1";
 

@@ -5,12 +5,22 @@ import {
   useState,
 } from 'react';
 
-import { WalletMinimal } from 'lucide-react';
+import {
+  Eye,
+  TrendingDown,
+  TrendingUp,
+  WalletMinimal,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { Utils } from '@/lib/utils';
 import { SERVICES } from '@/services/service';
+import {
+  PageLayout,
+  TransactionForm,
+  TransactionItems,
+} from '@/shared/components';
+import { Utils } from '@/shared/lib/utils';
 import { useGlobalStore } from '@/store/globalStore';
 import { BaseEntity } from '@/types/base';
 import {
@@ -18,12 +28,7 @@ import {
   TransactionReport,
 } from '@/types/transaction';
 
-import {
-  PageLayout,
-  TransactionForm,
-  TransactionItems,
-} from '../components';
-import { IconButton } from '../ui';
+import { IconButton } from '../../shared/components/ui';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -106,55 +111,62 @@ export default function Dashboard() {
       {/* Financial Overview Panels */}
       <div className="gap-4 grid grid-cols-2 mb-8">
         {/* Total Income Panel */}
-        <div className="bg-white shadow-lg p-4 rounded-md">
-          <div className="flex items-center gap-2">
-            <div className="bg-green-500 rounded-full w-3 h-3"></div>
-            <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
+        <div className="flex justify-between items-center bg-green-100 shadow-lg hover:shadow-xl p-4 border border-green-200 rounded-md text-green-500">
+          <div>
+            <h4 className="flex items-center gap-2 text-xs md:text-sm">
               Total Income
             </h4>
+
+            <p className="font-bold text-green-700 md:text-xl text:sm">
+              {Utils.currency.format(report?.totalIncome ?? 0)}
+            </p>
           </div>
-          <p className="font-bold text-gray-600 md:text-xl text:sm">
-            {Utils.currency.format(report?.totalIncome ?? 0)}
-          </p>
+          <div className="bg-green-500 p-1 rounded-md text-white">
+            <TrendingUp />
+          </div>
         </div>
 
         {/* Total Expenses Panel */}
-        <div className="bg-white shadow-lg p-4 rounded-md">
-          <div className="flex items-center gap-2">
-            <div className="bg-red-500 rounded-full w-3 h-3"></div>
-            <h4 className="flex items-center gap-2 font-semibold text-gray-600 text-xs md:text-sm">
-              Total Expense
+        <div className="flex justify-between items-center bg-red-100 shadow-lg hover:shadow-xl p-4 border border-red-200 rounded-md text-red-500">
+          <div>
+            <h4 className="flex items-center gap-2 text-xs md:text-sm">
+              Total Expenses
             </h4>
+
+            <p className="font-bold text-red-700 md:text-xl text:sm">
+              {Utils.currency.format(report?.totalExpense ?? 0)}
+            </p>
           </div>
-          <p className="font-bold text-gray-600 md:text-xl text:sm">
-            {Utils.currency.format(report?.totalExpense ?? 0)}
-          </p>
+          <div className="bg-red-500 p-1 rounded-md text-white">
+            <TrendingDown />
+          </div>
         </div>
       </div>
 
       {/* Additional Dashboard Content */}
       <div className="flex md:flex-row flex-col gap-4">
         <div className="w-full md:w-80">
-          <h3 className="mb-2 font-medium text-gray-500 text-lg">
-            Add New Transaction
-          </h3>
-          <div className="bg-white shadow p-4 rounded">
+          <div className="bg-white shadow-md p-4 rounded">
+            <h3 className="mb-2 font-medium text-gray-600 text-lg">
+              Add New Transaction
+            </h3>
+
             <TransactionForm actions={formActions} onSuccess={onSuccess} />
           </div>
         </div>
         <div className="flex-1">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-medium text-gray-500 text-lg">
-              Recent Activity
-            </h3>
-            <Link
-              href="/transactions"
-              className="font-bold text-gray-400 hover:text-gray-300 text-sm"
-            >
-              See all
-            </Link>
-          </div>
-          <div className="">
+          <div className="bg-white shadow-md p-4 rounded">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-medium text-gray-600 text-lg">
+                Recent Transactions
+              </h3>
+              <Link
+                href="/transactions"
+                className="flex items-center gap-1 font-medium text-amber-500 hover:text-amber-400 text-sm"
+              >
+                View all <Eye size={16} />
+              </Link>
+            </div>
             <TransactionItems transactions={transactions} />
           </div>
         </div>

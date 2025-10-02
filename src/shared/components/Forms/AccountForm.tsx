@@ -52,6 +52,7 @@ export default function AccountForm({
     setLoading(true);
     try {
       reset();
+      modal?.close();
 
       if (formData?.id) {
         await SERVICES.AccountService.update(formData.id as number, data);
@@ -64,7 +65,7 @@ export default function AccountForm({
       toast.error("Failed to create account");
     } finally {
       setLoading(false);
-      modal?.close();
+
       toast.success("Account created successfully");
       onSuccess?.();
     }
@@ -100,7 +101,7 @@ export default function AccountForm({
           htmlFor="amount"
           className="block font-bold text-gray-800 text-sm"
         >
-          Amount (You can not edit this field later)
+          Amount
         </label>
         <input
           type="number"
@@ -109,6 +110,9 @@ export default function AccountForm({
           {...register("amount", { valueAsNumber: true })}
           className="px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm disable:no-drop"
         />
+        <p className="text-gray-500 text-xs">
+          {`Note: Can't change after account is created`}
+        </p>
         {errors.amount && (
           <p className="text-red-500 text-xs">{errors.amount.message}</p>
         )}

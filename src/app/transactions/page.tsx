@@ -1,27 +1,23 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-import { CirclePlus } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { CirclePlus } from "lucide-react";
+import toast from "react-hot-toast";
 
-import { useModal } from '@/hooks';
-import { Utils } from '@/lib/utils';
-import { SERVICES } from '@/services/service';
-import { useGlobalStore } from '@/store/globalStore';
-import { BaseEntity } from '@/types/base';
-import { TransactionModel } from '@/types/transaction';
-
+import { useModal } from "@/hooks";
+import { SERVICES } from "@/services/service";
 import {
   Modal,
   PageLayout,
   TransactionForm,
   TransactionItems,
-} from '../components';
-import { IconButton } from '../ui';
+} from "@/shared/components";
+import { Utils } from "@/shared/lib/utils";
+import { useGlobalStore } from "@/store/globalStore";
+import { BaseEntity } from "@/types/base";
+import { TransactionModel } from "@/types/transaction";
+
+import { IconButton } from "../../shared/components/ui";
 
 export default function Transactions() {
   const [transactions, setTransactions] = useState<

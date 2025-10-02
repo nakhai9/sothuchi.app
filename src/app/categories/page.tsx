@@ -1,12 +1,11 @@
 "use client";
 
-import React from 'react';
+import React from "react";
 
-import Image from 'next/image';
+import Image from "next/image";
 
-import { CATEGORIES } from '@/lib/constants/categories';
-
-import { PageLayout } from '../components';
+import PageLayout from "@/shared/components/PageLayout";
+import { CATEGORIES } from "@/shared/lib/constants/categories";
 
 export default function Categories() {
   return (

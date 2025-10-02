@@ -1,26 +1,18 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
-import {
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useMemo, useState } from "react";
 
-import clsx from 'clsx';
-import {
-  Loader,
-  ScanLine,
-  X,
-} from 'lucide-react';
+import clsx from "clsx";
+import { Loader, ScanLine, X } from "lucide-react";
 import {
   DropzoneInputProps,
   DropzoneRootProps,
   FileRejection,
   useDropzone,
-} from 'react-dropzone';
+} from "react-dropzone";
 
-import { IconButton } from '../ui';
+import { IconButton } from "./ui";
 
 const ACCEPTED_FILE_TYPES = {
   "image/png": [".png", ".PNG"],

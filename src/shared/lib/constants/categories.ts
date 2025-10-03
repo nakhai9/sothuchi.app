@@ -177,3 +177,6 @@ export const CATEGORIES: Category[] = [
 ];
 
 export const USER_CURRENCY = "VND";
+
+export const UNKNOWN_CATEGORY_ICON =
+  "https://www.svgrepo.com/show/390423/check-faq-help-information-mark-question.svg";

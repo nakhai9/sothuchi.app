@@ -1,11 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { ChevronDown, LogOut, Shapes, UserCog } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import {
+  ChevronDown,
+  LogOut,
+  Shapes,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { Utils } from "@/shared/lib/utils";
-import { useGlobalStore } from "@/store/globalStore";
+import { Utils } from '@/shared/lib/utils';
+import { useGlobalStore } from '@/store/globalStore';
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 type UserInfoProps = {
@@ -84,13 +92,13 @@ export default function UserInfo({}: UserInfoProps) {
               <span>Categories</span>
               <Shapes size={16} />
             </Link>
-            <Link
+            {/* <Link
               href="/settings"
               className="flex justify-between items-center gap-2 hover:bg-amber-400 px-4 py-2 text-sm cursor-pointer"
             >
               <span>Settings</span>
               <UserCog size={16} />
-            </Link>
+            </Link> */}
             <button
               type="button"
               onClick={handleLogout}

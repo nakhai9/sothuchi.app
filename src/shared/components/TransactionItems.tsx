@@ -4,7 +4,10 @@ import clsx from 'clsx';
 import { ReceiptText } from 'lucide-react';
 import Image from 'next/image';
 
-import { CATEGORIES } from '@/shared/lib/constants/categories';
+import {
+  CATEGORIES,
+  UNKNOWN_CATEGORY_ICON,
+} from '@/shared/lib/constants/categories';
 
 type TransactionItemsProps = {
   transactions: any;
@@ -40,7 +43,11 @@ export default function TransactionItems({
             >
               <Image
                 src={
-                  CATEGORIES.find((cat) => cat.value === x.category)?.icon ?? ""
+                  CATEGORIES.find(
+                    (cat) =>
+                      cat.value.trim().toLowerCase() ===
+                      x.category.trim().toLowerCase()
+                  )?.icon ?? UNKNOWN_CATEGORY_ICON
                 }
                 alt={x.category ?? "category icon"}
                 fill
@@ -53,7 +60,7 @@ export default function TransactionItems({
               <div className="text-gray-500 text-xs">{x.paidAtFormatted}</div>
             </div>
           </div>
-          <div className="flex flex-col items-center text-right">
+          <div className="flex flex-col justify-center items-center text-right">
             <p
               className={clsx(
                 "font-medium text-lg",
@@ -62,7 +69,7 @@ export default function TransactionItems({
             >
               {x.amountFormatted}
             </p>
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               <button
                 type="button"
                 className="text-blue-500 text-sm hover:underline cursor-pointer"
@@ -76,7 +83,7 @@ export default function TransactionItems({
               >
                 Delete
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       ))}

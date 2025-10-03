@@ -167,7 +167,9 @@ export default function Dashboard() {
                 View all <Eye size={16} />
               </Link>
             </div>
-            <TransactionItems transactions={transactions} />
+            <div className="max-h-[400px] overflow-auto">
+              <TransactionItems transactions={transactions} />
+            </div>
           </div>
         </div>
       </div>

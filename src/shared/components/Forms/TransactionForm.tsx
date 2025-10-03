@@ -30,11 +30,11 @@ import FileUploadZone from '../FileUploadZone';
 import TransactionItems from '../TransactionItems';
 
 const transactionSchema = z.object({
-  amount: z.number().min(1, "Amount is required"),
-  description: z.string().min(1, "Description is required"),
+  amount: z.number().optional(),
+  description: z.string().optional(),
   accountId: z.string().min(1, "Account is required"),
-  paidAt: z.string().min(1, "Date is required"),
-  category: z.string().min(1, "Category is required"),
+  paidAt: z.string().optional(),
+  category: z.string().optional(),
 });
 
 export type TransactionFormData = z.infer<typeof transactionSchema>;
@@ -63,7 +63,9 @@ export default function TransactionForm({
   const [isScanning, setIsScanning] = useState(false);
   const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
   const [type, setType] = useState<"income" | "expense">("expense");
-  const [data, setData] = useState<TransactionModel[]>([]);
+  const [scannedTransactions, setScannedTransactions] = useState<
+    TransactionModel[]
+  >([]);
   const {
     register,
     handleSubmit,
@@ -98,6 +100,8 @@ export default function TransactionForm({
   const onSubmit: SubmitHandler<TransactionFormData> = async (
     data: TransactionFormData
   ) => {
+    console.log("Submitting data:", data);
+
     setLoading(true);
     modal?.close();
     reset();
@@ -105,13 +109,24 @@ export default function TransactionForm({
       if (mode === "manual") {
         await SERVICES.TransactionService.create({
           accountId: Number(data.accountId),
-          amount: data.amount,
-          description: data.description,
-          paidAt: new Date(data.paidAt),
+          amount: data.amount!,
+          description: data.description!,
+          paidAt: new Date(data.paidAt!),
           type: type,
-          category: data.category,
+          category: data.category!,
         });
       } else {
+        await SERVICES.TransactionService.createMany(
+          scannedTransactions.map((item) => ({
+            accountId: Number(data.accountId),
+            amount: item.amount,
+            description: item.description,
+            paidAt: new Date(item.paidAt),
+            type: type,
+            category: item.category,
+          }))
+        );
+        setScannedTransactions([]);
       }
 
       await onSuccess?.();
@@ -138,7 +153,7 @@ export default function TransactionForm({
           } as TransactionModel)
       );
 
-      setData(cleanData);
+      setScannedTransactions(cleanData);
     } catch (error) {
       console.error("Error scanning receipt:", error);
     } finally {
@@ -174,7 +189,7 @@ export default function TransactionForm({
   );
 
   const ManualForm = () => (
-    <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
+    <div className="flex flex-col gap-3">
       <div className="flex justify-center items-center gap-5">
         <SwitchType />
       </div>
@@ -278,9 +293,9 @@ export default function TransactionForm({
               </option>
             ))}
         </select>
-        {errors.accountId && (
+        {errors.category && (
           <span className="text-red-500 text-xs">
-            {errors.accountId.message}
+            {errors.category.message}
           </span>
         )}
       </div>
@@ -312,11 +327,11 @@ export default function TransactionForm({
           {actions.map((action) => action)}
         </div>
       )}
-    </form>
+    </div>
   );
 
   const BillForm = () => (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <div className="flex flex-col gap-4">
       <div className="flex justify-center items-center gap-5">
         <SwitchType />
       </div>
@@ -350,33 +365,30 @@ export default function TransactionForm({
           </span>
         )}
       </div>
+
+      {/* Hidden fields for form validation - not used in bill mode */}
+      <input type="hidden" {...register("amount")} />
+      <input type="hidden" {...register("description")} />
+      <input type="hidden" {...register("paidAt")} />
+      <input type="hidden" {...register("category")} />
+
       <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
       <div className="max-h-[400px] overflow-auto">
-        {data.length > 0 && (
+        {scannedTransactions.length > 0 && (
           <div>
             <h4 className="my-2 font-bold text-gray-500">
               Scanned Transactions
             </h4>
-            <TransactionItems transactions={data} />
+            <TransactionItems transactions={scannedTransactions} />
           </div>
         )}
       </div>
-      <div className="flex justify-end gap-3">
-        <button
-          type="button"
-          onClick={modal?.close}
-          className="bg-white hover:bg-gray-50 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-gray-700 text-sm cursor-pointer"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="bg-amber-500 hover:bg-amber-600 px-4 py-2 border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 font-medium text-white text-sm cursor-pointer"
-        >
-          Save
-        </button>
-      </div>
-    </form>
+      {actions && actions?.length > 0 && (
+        <div className="flex justify-end gap-3">
+          {actions.map((action) => action)}
+        </div>
+      )}
+    </div>
   );
 
   return (
@@ -403,7 +415,9 @@ export default function TransactionForm({
           Scan Bill
         </button>
       </div>
-      {mode === "manual" ? <ManualForm /> : <BillForm />}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {mode === "manual" ? <ManualForm /> : <BillForm />}
+      </form>
     </div>
   );
 }

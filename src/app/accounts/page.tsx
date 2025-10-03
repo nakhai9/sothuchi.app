@@ -296,7 +296,7 @@ export default function Account() {
                 </span>
               </div>
             </div>
-            <div className="overflow-auto">
+            <div className="max-h-[500px] overflow-auto">
               <TransactionItems transactions={transactions} />
             </div>
           </div>

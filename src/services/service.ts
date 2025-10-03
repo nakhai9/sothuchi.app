@@ -82,7 +82,7 @@ export const SERVICES = {
     },
     createMany: async (payload: TransactionModel[]): Promise<void> => {
       try {
-        await httpService.post(BASE_URLS.transactions, payload);
+        await httpService.post(`${BASE_URLS.transactions}/many`, payload);
       } catch (error) {
         console.error(error);
       }

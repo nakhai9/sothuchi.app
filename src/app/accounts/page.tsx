@@ -296,7 +296,7 @@ export default function Account() {
                 </span>
               </div>
             </div>
-            <div className="px-3 py-4 overflow-auto">
+            <div className="overflow-auto">
               <TransactionItems transactions={transactions} />
             </div>
           </div>

@@ -1,18 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-import { Utils } from "@/shared/lib/utils";
-import { AccountModel, AccountReport } from "@/types/account";
-import { BaseEntity, DropdownOption, ResponseBase } from "@/types/base";
-import { CategoryModel } from "@/types/category";
+import { Utils } from '@/shared/lib/utils';
 import {
-  ReceiptTransaction,
+  AccountModel,
+  AccountReport,
+} from '@/types/account';
+import {
+  BaseEntity,
+  DropdownOption,
+  ResponseBase,
+} from '@/types/base';
+import { CategoryModel } from '@/types/category';
+import {
   TransactionModel,
   TransactionReport,
-} from "@/types/transaction";
-import { UserInfo, UserLogin, UserSignUp, UserToken } from "@/types/user";
+} from '@/types/transaction';
+import {
+  UserInfo,
+  UserLogin,
+  UserSignUp,
+  UserToken,
+} from '@/types/user';
 
-import { httpService } from "../shared/lib/config/httpService";
+import { httpService } from '../shared/lib/config/httpService';
 
 const API_PREFIX = "api/v1";
 
@@ -63,6 +74,13 @@ export const SERVICES = {
       }
     },
     create: async (payload: TransactionModel): Promise<void> => {
+      try {
+        await httpService.post(BASE_URLS.transactions, payload);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    createMany: async (payload: TransactionModel[]): Promise<void> => {
       try {
         await httpService.post(BASE_URLS.transactions, payload);
       } catch (error) {
@@ -140,9 +158,132 @@ export const SERVICES = {
 
   // AI Service
   AIService: {
-    scanReceiptWithAI: async (files: File[]): Promise<ReceiptTransaction[]> => {
+    scanReceiptWithAI: async (files: File[]): Promise<TransactionModel[]> => {
       const systemPrompt = `
     You are an expert at extracting information from receipts.
+
+      CATEGORIES = [
+      {
+        name: "Drink",
+        type: "expense",
+        value: "drink",
+      },
+      {
+        name: "Food",
+        type: "expense",
+        value: "food",
+      },
+      {
+        name: "Wifi & Internet",
+        type: "expense",
+        value: "internet",
+      },
+      {
+        name: "Entertainment",
+        type: "expense",
+        value: "entertainment",
+      },
+      {
+        name: "Beauty",
+        type: "expense",
+        value: "beauty",
+      },
+      {
+        name: "Fitness & Gym",
+        type: "expense",
+        value: "fitness",
+      },
+      {
+        name: "Travel",
+        type: "expense",
+        value: "travel",
+      },
+      {
+        name: "Fuel",
+        type: "expense",
+        value: "fuel",
+      },
+      {
+        name: "Gifts",
+        type: "expense",
+        value: "gifts",
+      },
+      {
+        name: "Shopping",
+        type: "expense",
+        value: "shopping",
+      },
+      {
+        name: "Salary",
+        type: "income",
+        value: "salary",
+      },
+      {
+        name: "Health care",
+        type: "expense",
+        value: "health",
+      },
+      {
+        name: "Rent & Housing",
+        type: "expense",
+        value: "rent_housing",
+      },
+      {
+        name: "Repair",
+        type: "expense",
+        value: "repair",
+      },
+      {
+        name: "Electronics",
+        type: "expense",
+        value: "electronics",
+      },
+      {
+        name: "Water",
+        type: "expense",
+        value: "water",
+      },
+      {
+        name: "Loan",
+        type: "expense",
+        value: "loan",
+      },
+      {
+        name: "Debt",
+        type: "income",
+        value: "debt",
+      },
+      {
+        name: "Tips or Donation",
+        type: "income",
+        value: "tips_or_donation",
+      },
+      {
+        name: "Saving",
+        type: "income",
+        value: "saving",
+      },
+      {
+        name: "Transfer In",
+        type: "income",
+        value: "transfer_in",
+      },
+      {
+        name: "Transfer Out",
+        type: "expense",
+        value: "transfer_out",
+      },
+      {
+        name: "Income Default",
+        type: "income",
+        value: "income_default",
+      },
+      {
+        name: "Expense Default",
+        type: "expense",
+        value: "expense_default",
+      },
+    ];
 
     Task:
     - Analyze the provided receipt image
@@ -151,10 +292,13 @@ export const SERVICES = {
 
     Output format (TypeScript type):
     export type TransactionModel = {
-      description: string; // item name, including quantity if visible (e.g., "Hong Tra Sua (x2)")
+      description: string; // item's name, store's name, including quantity if visible (e.g., "Hong Tra Sua (x2) - Shop Store")
       amount: number;      // item price
       date: Date;          // receipt date, format YYYY-M-D (no leading zero in day or month)
-    }
+      type: "income" | "expense";
+      paidAt: Date;
+      category: string;    // use the 'value' field from CATEGORIES above, choose the most appropriate one
+    };    
 
     Guidelines:
     - Use the receipt date for all items. If missing, return null for date.

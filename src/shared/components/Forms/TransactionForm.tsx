@@ -21,11 +21,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { UseModalReturn } from '@/hooks/useModal';
 import { SERVICES } from '@/services/service';
 import { CATEGORIES } from '@/shared/lib/constants/categories';
+import { Utils } from '@/shared/lib/utils';
 import { useGlobalStore } from '@/store/globalStore';
 import { DropdownOption } from '@/types/base';
-import { ReceiptTransaction } from '@/types/transaction';
+import { TransactionModel } from '@/types/transaction';
 
 import FileUploadZone from '../FileUploadZone';
+import TransactionItems from '../TransactionItems';
 
 const transactionSchema = z.object({
   amount: z.number().min(1, "Amount is required"),
@@ -61,7 +63,7 @@ export default function TransactionForm({
   const [isScanning, setIsScanning] = useState(false);
   const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
   const [type, setType] = useState<"income" | "expense">("expense");
-  const [data, setData] = useState<ReceiptTransaction[]>([]);
+  const [data, setData] = useState<TransactionModel[]>([]);
   const {
     register,
     handleSubmit,
@@ -97,23 +99,27 @@ export default function TransactionForm({
     data: TransactionFormData
   ) => {
     setLoading(true);
+    modal?.close();
+    reset();
     try {
-      await SERVICES.TransactionService.create({
-        accountId: Number(data.accountId),
-        amount: data.amount,
-        description: data.description,
-        paidAt: new Date(data.paidAt),
-        type: type,
-        category: data.category,
-      });
-      reset();
+      if (mode === "manual") {
+        await SERVICES.TransactionService.create({
+          accountId: Number(data.accountId),
+          amount: data.amount,
+          description: data.description,
+          paidAt: new Date(data.paidAt),
+          type: type,
+          category: data.category,
+        });
+      } else {
+      }
+
       await onSuccess?.();
       toast.success("Created successfully");
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
-      modal?.close();
     }
   };
 
@@ -122,7 +128,17 @@ export default function TransactionForm({
     setIsScanning(true);
     try {
       const result = await SERVICES.AIService.scanReceiptWithAI(files);
-      setData(result);
+
+      const cleanData = result.map(
+        (item) =>
+          ({
+            ...item,
+            amountFormatted: Utils.currency.format(item.amount),
+            paidAtFormatted: Utils.date.format(item.paidAt),
+          } as TransactionModel)
+      );
+
+      setData(cleanData);
     } catch (error) {
       console.error("Error scanning receipt:", error);
     } finally {
@@ -334,18 +350,15 @@ export default function TransactionForm({
           </span>
         )}
       </div>
+      <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
       <div className="max-h-[400px] overflow-auto">
-        <FileUploadZone
-          onFileUpload={handleFileUpload}
-          isLoading={isScanning}
-        />
-
         {data.length > 0 && (
-          <>
+          <div>
             <h4 className="my-2 font-bold text-gray-500">
               Scanned Transactions
             </h4>
-          </>
+            <TransactionItems transactions={data} />
+          </div>
         )}
       </div>
       <div className="flex justify-end gap-3">
@@ -368,7 +381,7 @@ export default function TransactionForm({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* <div className="flex">
+      <div className="flex">
         <button
           className={clsx(
             "px-6 py-2 border-slate-700 w-full font-bold text-sm cursor-pointer",
@@ -387,10 +400,10 @@ export default function TransactionForm({
           )}
           onClick={() => setMode("from-bill-image")}
         >
-          From bill image
+          Scan Bill
         </button>
-      </div> */}
-      <ManualForm />
+      </div>
+      {mode === "manual" ? <ManualForm /> : <BillForm />}
     </div>
   );
 }

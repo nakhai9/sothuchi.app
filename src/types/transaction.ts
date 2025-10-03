@@ -10,12 +10,6 @@ export type TransactionModel = {
   paidAtFormatted?: string;
 };
 
-export type ReceiptTransaction = {
-  description: string;
-  amount: number;
-  date: Date;
-};
-
 export type TransactionReport = {
   totalIncome: number;
   totalExpense: number;

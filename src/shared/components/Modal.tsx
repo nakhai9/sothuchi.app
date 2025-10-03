@@ -30,7 +30,11 @@ export default function Modal({
         <div className="relative bg-white shadow-xl rounded-lg w-full max-w-xl overflow-hidden">
           <div className="flex justify-between items-center p-4 px-6">
             <div className="flex flex-col">
-              {title && <h3 className="font-semibold text-slate-700 text-lg">{title}</h3>}
+              {title && (
+                <h3 className="font-semibold text-slate-700 text-lg">
+                  {title}
+                </h3>
+              )}
               {description && (
                 <p className="text-slate-500 text-sm">{description}</p>
               )}
@@ -42,7 +46,9 @@ export default function Modal({
               <X size={20} />
             </button>
           </div>
-          <div className="px-6 pb-6">{children}</div>
+          <div className="px-6 pb-6 max-h-[400px] overflow-auto">
+            {children}
+          </div>
         </div>
       </div>
     </div>

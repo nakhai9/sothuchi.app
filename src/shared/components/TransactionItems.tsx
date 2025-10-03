@@ -15,7 +15,7 @@ export default function TransactionItems({
   return (
     <div className="flex flex-col gap-2">
       {transactions.length === 0 && (
-        <div className="flex flex-col justify-center items-center gap-2 text-gray-500">
+        <div className="flex flex-col justify-center items-center gap-2 px-3 py-4 text-gray-500">
           <div className="">
             <ReceiptText size={40} />
           </div>
@@ -28,10 +28,10 @@ export default function TransactionItems({
         </div>
       )}
 
-      {transactions.map((x: any) => (
+      {transactions.map((x: any, index: number) => (
         <div
-          key={x.id}
-          className="flex justify-between bg-white px-4 py-2 border hover:border-amber-800 border-transparent hover:border-dashed rounded-md"
+          key={x.id ?? index}
+          className="flex justify-between bg-white hover:bg-blue-50 px-4 py-2 rounded-md"
         >
           <div className="flex items-center gap-3">
             <div
@@ -42,7 +42,7 @@ export default function TransactionItems({
                 src={
                   CATEGORIES.find((cat) => cat.value === x.category)?.icon ?? ""
                 }
-                alt={x.category}
+                alt={x.category ?? "category icon"}
                 fill
                 className="object-contain"
               />

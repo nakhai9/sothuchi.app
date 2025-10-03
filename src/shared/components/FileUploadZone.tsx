@@ -1,18 +1,26 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
-import { useCallback, useMemo, useState } from "react";
+import {
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 
-import clsx from "clsx";
-import { Loader, ScanLine, X } from "lucide-react";
+import clsx from 'clsx';
+import {
+  Loader,
+  ScanLine,
+  X,
+} from 'lucide-react';
 import {
   DropzoneInputProps,
   DropzoneRootProps,
   FileRejection,
   useDropzone,
-} from "react-dropzone";
+} from 'react-dropzone';
 
-import { IconButton } from "./ui";
+import { IconButton } from './ui';
 
 const ACCEPTED_FILE_TYPES = {
   "image/png": [".png", ".PNG"],
@@ -137,7 +145,7 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
   );
 
   return (
-    <div className="relative bg-white p-4 border border-gray-300 rounded-lg h-80">
+    <div className="relative bg-white p-4 border border-gray-300 rounded-lg h-40">
       <div className={containerClasses}>
         {isLoading && <LoadingOverlay />}
 

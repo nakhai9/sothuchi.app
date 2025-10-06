@@ -85,7 +85,7 @@ export default function SignInPage() {
             value={password}
           />
         </div>
-        <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center space-y-4 sm:space-y-0 mb-6">
+        {/* <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center space-y-4 sm:space-y-0 mb-6">
           <div className="flex items-center">
             <input
               id="remember-me"
@@ -105,7 +105,7 @@ export default function SignInPage() {
               Forgotten password
             </a>
           </div>
-        </div>
+        </div> */}
         <button
           type="submit"
           className="bg-amber-600 hover:bg-amber-700 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 w-full text-white text-sm sm:text-base cursor-pointer"

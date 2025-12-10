@@ -1,11 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
-import { ChevronDown, LogOut, Shapes, UserCog } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import {
+  ChevronDown,
+  LogOut,
+  Shapes,
+  UserCog,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { Utils } from "@/shared/lib/utils";
-import { useGlobalStore } from "@/store/globalStore";
+import { supabase } from '@/shared/lib/config/supabaseClient';
+import { useGlobalStore } from '@/store/globalStore';
 
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 type UserInfoProps = {
@@ -39,8 +48,8 @@ export default function UserInfo({}: UserInfoProps) {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = () => {
-    // Add logout logic here
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     clearUserInfo();
     setIsDropdownOpen(false);
     router.push("/auth/sign-in");
@@ -55,11 +64,11 @@ export default function UserInfo({}: UserInfoProps) {
           <p className="font-bold">{userInfo?.fullName}</p>
           <span className="text-xs">{userInfo?.email}</span>
         </div>
-        <div className="flex justify-center items-center bg-white/10 border border-slate-200 rounded-full w-10 h-10">
+        {/* <div className="flex justify-center items-center bg-white/10 border border-slate-200 rounded-full w-10 h-10">
           <span className="font-semibold text-gray-500">
             {userInfo?.fullName && Utils.text.getInitial(userInfo?.fullName)}
           </span>
-        </div>
+        </div> */}
 
         <ChevronDown
           className={`w-4 h-4 transition-transform ${

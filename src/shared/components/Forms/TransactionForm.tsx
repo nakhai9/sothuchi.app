@@ -1,11 +1,9 @@
 "use client";
-import {
-  useEffect,
-  useState,
-} from 'react';
+import React, { useState } from 'react';
 
 import clsx from 'clsx';
 import {
+  RefreshCcw,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react';
@@ -16,15 +14,13 @@ import {
 import toast from 'react-hot-toast';
 import z from 'zod';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-
 import { UseModalReturn } from '@/hooks/useModal';
 import { SERVICES } from '@/services/service';
 import { CATEGORIES } from '@/shared/lib/constants/categories';
 import { Utils } from '@/shared/lib/utils';
 import { useGlobalStore } from '@/store/globalStore';
-import { DropdownOption } from '@/types/base';
 import { TransactionModel } from '@/types/transaction';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import FileUploadZone from '../FileUploadZone';
 import TransactionItems from '../TransactionItems';
@@ -32,7 +28,6 @@ import TransactionItems from '../TransactionItems';
 const transactionSchema = z.object({
   amount: z.number().optional(),
   description: z.string().optional(),
-  accountId: z.string().min(1, "Account is required"),
   paidAt: z.string().optional(),
   category: z.string().optional(),
 });
@@ -44,25 +39,25 @@ type TransactionFormProps = {
   onSuccess?: () => void;
   actions?: React.ReactNode[];
   formData?: Partial<TransactionFormData>;
+  readOnly?: boolean;
+  transactionType?: "income" | "expense";
+  transactionId?: string | number;
 };
-
-const columns = [
-  { title: "Description", field: "description" as const },
-  { title: "Amount", field: "amount" as const },
-  { title: "Date", field: "date" as const },
-];
 
 export default function TransactionForm({
   modal,
   onSuccess,
   actions,
   formData,
+  readOnly = false,
+  transactionType,
+  transactionId,
 }: TransactionFormProps) {
   const [mode, setMode] = useState<"manual" | "from-bill-image">("manual");
-  const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [accountOptions, setAccountOptions] = useState<DropdownOption[]>([]);
-  const [type, setType] = useState<"income" | "expense">("expense");
+  const [type, setType] = useState<"income" | "expense">(
+    transactionType || "expense"
+  );
   const [scannedTransactions, setScannedTransactions] = useState<
     TransactionModel[]
   >([]);
@@ -76,49 +71,57 @@ export default function TransactionForm({
     defaultValues: {
       amount: 0,
       description: "",
-      accountId: formData?.accountId || "",
       paidAt: new Date().toISOString().slice(0, 10),
       category: "",
     },
   });
 
+  // Reset form khi formData thay đổi
+  React.useEffect(() => {
+    if (formData) {
+      reset({
+        amount: formData.amount,
+        description: formData.description,
+        paidAt: formData.paidAt,
+        category: formData.category,
+      });
+    }
+  }, [formData, reset]);
+
   const setLoading = useGlobalStore((state) => state.setLoading);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const accounts = await SERVICES.LookupService.getAccounts();
-        if (accounts) setAccountOptions(accounts);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const onSubmit: SubmitHandler<TransactionFormData> = async (
     data: TransactionFormData
   ) => {
-    console.log("Submitting data:", data);
-
     setLoading(true);
     modal?.close();
     reset();
+    setType("expense");
     try {
-      if (mode === "manual") {
-        await SERVICES.TransactionService.create({
-          accountId: Number(data.accountId),
+      // Nếu có transactionId thì update, không thì create
+      if (transactionId) {
+        await SERVICES.TransactionService.update(String(transactionId), {
           amount: data.amount!,
           description: data.description!,
           paidAt: new Date(data.paidAt!),
           type: type,
           category: data.category!,
         });
+        await onSuccess?.();
+        toast.success("Updated successfully");
+      } else if (mode === "manual") {
+        await SERVICES.TransactionService.create({
+          amount: data.amount!,
+          description: data.description!,
+          paidAt: new Date(data.paidAt!),
+          type: type,
+          category: data.category!,
+        });
+        await onSuccess?.();
+        toast.success("Created successfully");
       } else {
         await SERVICES.TransactionService.createMany(
           scannedTransactions.map((item) => ({
-            accountId: Number(data.accountId),
             amount: item.amount,
             description: item.description,
             paidAt: new Date(item.paidAt),
@@ -127,10 +130,9 @@ export default function TransactionForm({
           }))
         );
         setScannedTransactions([]);
+        await onSuccess?.();
+        toast.success("Created successfully");
       }
-
-      await onSuccess?.();
-      toast.success("Created successfully");
     } catch (error) {
       toast.error("Something went wrong");
     } finally {
@@ -156,6 +158,7 @@ export default function TransactionForm({
       setScannedTransactions(cleanData);
     } catch (error) {
       console.error("Error scanning receipt:", error);
+      toast.error("Không thể quét hóa đơn. Vui lòng thử lại");
     } finally {
       setIsScanning(false);
     }
@@ -165,22 +168,26 @@ export default function TransactionForm({
     <div className="flex shadow-md p-1 border border-slate-300 rounded-full">
       <button
         type="button"
+        disabled={readOnly}
         className={clsx(
-          `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
-          type === "expense" ? "bg-red-200" : ""
+          `flex items-center gap-2 px-5 py-1 rounded-full text-sm`,
+          type === "expense" ? "bg-red-200" : "",
+          readOnly ? "cursor-not-allowed opacity-50" : "cursor-pointer"
         )}
-        onClick={() => setType("expense")}
+        onClick={() => !readOnly && setType("expense")}
       >
         <TrendingDown className="text-red-600" size={14} />
         Expense
       </button>
       <button
         type="button"
+        disabled={readOnly}
         className={clsx(
-          `flex items-center gap-2 px-5 py-1 rounded-full text-sm cursor-pointer`,
-          type === "income" ? "bg-green-200" : ""
+          `flex items-center gap-2 px-5 py-1 rounded-full text-sm`,
+          type === "income" ? "bg-green-200" : "",
+          readOnly ? "cursor-not-allowed opacity-50" : "cursor-pointer"
         )}
-        onClick={() => setType("income")}
+        onClick={() => !readOnly && setType("income")}
       >
         <TrendingUp className="text-green-600" size={14} />
         Income
@@ -205,9 +212,10 @@ export default function TransactionForm({
             type="number"
             id="amount"
             {...register("amount", { valueAsNumber: true })}
+            disabled={readOnly}
             className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
               errors.amount ? "border-red-500" : "border-slate-300"
-            }`}
+            } ${readOnly ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
           {errors.amount && (
             <span className="text-red-500 text-xs">
@@ -226,9 +234,10 @@ export default function TransactionForm({
             type="date"
             id="date"
             {...register("paidAt")}
+            disabled={readOnly}
             className={`px-3 py-2 border w-full rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
               errors.paidAt ? "border-red-500" : "border-slate-300"
-            }`}
+            } ${readOnly ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
           {errors.paidAt && (
             <span className="text-red-500 text-xs">
@@ -243,45 +252,15 @@ export default function TransactionForm({
           htmlFor="accountId"
           className="block font-medium text-gray-600 text-sm"
         >
-          Account
-        </label>
-        <select
-          id="accountId"
-          {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.accountId ? "border-red-500" : "border-slate-300"
-          }`}
-        >
-          <option value="" disabled hidden>
-            - Select -
-          </option>
-          {accountOptions.length &&
-            accountOptions.map((x) => (
-              <option key={x.value} value={x.value}>
-                {x.label}
-              </option>
-            ))}
-        </select>
-        {errors.accountId && (
-          <span className="text-red-500 text-xs">
-            {errors.accountId.message}
-          </span>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="accountId"
-          className="block font-medium text-gray-600 text-sm"
-        >
           Category
         </label>
         <select
           id="category"
           {...register("category")}
+          disabled={readOnly}
           className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
             errors.category ? "border-red-500" : "border-slate-300"
-          }`}
+          } ${readOnly ? "bg-gray-100 cursor-not-allowed" : ""}`}
         >
           <option value="" disabled hidden>
             - Select -
@@ -311,9 +290,10 @@ export default function TransactionForm({
           type="text"
           id="description"
           {...register("description")}
+          disabled={readOnly}
           className={`px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
             errors.description ? "border-red-500" : "border-slate-300"
-          }`}
+          } ${readOnly ? "bg-gray-100 cursor-not-allowed" : ""}`}
         />
         {errors.description && (
           <span className="text-red-500 text-xs">
@@ -330,91 +310,101 @@ export default function TransactionForm({
     </div>
   );
 
-  const BillForm = () => (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-center items-center gap-5">
-        <SwitchType />
-      </div>
-      <div className="flex flex-col gap-1">
-        <label
-          htmlFor="accountId"
-          className="block font-medium text-gray-600 text-sm"
-        >
-          Account
-        </label>
-        <select
-          id="accountId"
-          {...register("accountId")}
-          className={`block px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm ${
-            errors.accountId ? "border-red-500" : "border-slate-300"
-          }`}
-        >
-          <option value="" disabled hidden>
-            - Select -
-          </option>
-          {accountOptions.length &&
-            accountOptions.map((x) => (
-              <option key={x.value} value={x.value}>
-                {x.label}
-              </option>
-            ))}
-        </select>
-        {errors.accountId && (
-          <span className="text-red-500 text-xs">
-            {errors.accountId.message}
-          </span>
-        )}
-      </div>
+  const BillForm = () => {
+    // Tính tổng tiền của các transactions đã scan
+    const totalAmount = scannedTransactions.reduce(
+      (sum, transaction) => sum + transaction.amount,
+      0
+    );
 
-      {/* Hidden fields for form validation - not used in bill mode */}
-      <input type="hidden" {...register("amount")} />
-      <input type="hidden" {...register("description")} />
-      <input type="hidden" {...register("paidAt")} />
-      <input type="hidden" {...register("category")} />
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-center items-center gap-5">
+          <SwitchType />
+        </div>
+        
+        {/* Chỉ hiển thị upload zone khi chưa scan xong */}
+        {
+          scannedTransactions.length === 0 && (
+            <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
+          )
+        }
 
-      <FileUploadZone onFileUpload={handleFileUpload} isLoading={isScanning} />
-      <div className="max-h-[400px] overflow-auto">
+        {/* Hiển thị kết quả scan */}
         {scannedTransactions.length > 0 && (
-          <div>
-            <h4 className="my-2 font-bold text-gray-500">
-              Scanned Transactions
-            </h4>
+          <div className="max-h-[400px] overflow-auto">
+            <div className="flex justify-between items-center my-2">
+              <h4 className="font-bold text-gray-500">
+                Scanned {scannedTransactions.length} items
+              </h4>
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-lg text-amber-600">
+                  Total: {Utils.currency.format(totalAmount)}
+                </span>
+                
+              </div>
+            </div>
             <TransactionItems transactions={scannedTransactions} />
+            <button
+              key="re-scan"
+              type="button"
+              className="border-amber-500 mt-4 flex items-center justify-center gap-2 hover:bg-amber-50 px-4 py-2 border bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 w-full font-medium text-amber-500 text-sm cursor-pointer"
+              onClick={() => setScannedTransactions([])}
+            >
+              <RefreshCcw size={16} />
+              Re-scan
+            </button>
+          </div>
+        )}
+        
+        {actions && actions?.length > 0 && (
+          <div 
+            className={clsx(
+              "flex justify-end gap-3",
+              (isScanning || (mode === 'from-bill-image' && scannedTransactions.length === 0)) && 
+                "pointer-events-none opacity-50"
+            )}
+          >
+            {actions.map((action) => action)}
           </div>
         )}
       </div>
-      {actions && actions?.length > 0 && (
-        <div className="flex justify-end gap-3">
-          {actions.map((action) => action)}
-        </div>
-      )}
-    </div>
-  );
+    );
+  };
+
+  // Khi edit hoặc view, chỉ hiển thị manual form
+  React.useEffect(() => {
+    if (transactionId || readOnly) {
+      setMode("manual");
+    }
+  }, [transactionId, readOnly]);
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex">
-        <button
-          className={clsx(
-            "px-6 py-2 border-slate-700 w-full font-bold text-sm cursor-pointer",
-            mode === "manual" ? "border-b-2 border-slate-700" : "text-slate-300"
-          )}
-          onClick={() => setMode("manual")}
-        >
-          Manual
-        </button>
-        <button
-          className={clsx(
-            "px-6 py-2 border-slate-700 w-full font-bold text-sm cursor-pointer",
-            mode === "from-bill-image"
-              ? "border-b-2 border-slate-700"
-              : "text-slate-300"
-          )}
-          onClick={() => setMode("from-bill-image")}
-        >
-          Scan Bill
-        </button>
-      </div>
+      {!readOnly && !transactionId && (
+        <div className="flex">
+          <button
+            className={clsx(
+              "px-6 py-2 border-slate-700 w-full font-bold text-sm cursor-pointer",
+              mode === "manual" ? "border-b-2 border-slate-700" : "text-slate-300"
+            )}
+            onClick={() => setMode("manual")}
+          >
+            Manual
+          </button>
+          <button
+            className={clsx(
+              "px-6 py-2 border-slate-700 w-full font-bold text-sm cursor-pointer",
+              mode === "from-bill-image"
+                ? "border-b-2 border-slate-700"
+                : "text-slate-300"
+            )}
+            onClick={() => setMode("from-bill-image")}
+          >
+            Scan Bill
+          </button>
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)}>
         {mode === "manual" ? <ManualForm /> : <BillForm />}
       </form>

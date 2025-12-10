@@ -34,9 +34,12 @@ export const Utils = {
     },
   },
   date: {
-    format: (date: Date, formatString?: string) => {
+    format: (date: Date | null | undefined, formatString?: string) => {
+      if (!date) return "N/A";
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return "N/A";
       const fs = formatString ? formatString : "dd/MM/yyyy";
-      return format(new Date(date), fs);
+      return format(dateObj, fs);
     },
   },
 };

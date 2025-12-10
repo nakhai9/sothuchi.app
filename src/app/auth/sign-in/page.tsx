@@ -1,14 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useState } from 'react';
 
-import { setCookie } from "cookies-next";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { setCookie } from 'cookies-next';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
-import { SERVICES } from "@/services/service";
-import AuthLayout from "@/shared/components/AuthLayout";
-import { useGlobalStore } from "@/store/globalStore";
+import AuthLayout from '@/shared/components/AuthLayout';
+import { supabase } from '@/shared/lib/config/supabaseClient';
+import { useGlobalStore } from '@/store/globalStore';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -19,33 +19,83 @@ export default function SignInPage() {
   const [password, setPassword] = useState(
     process.env.NEXT_PUBLIC_SYSTEM_PASSWORD ?? ""
   );
+  const [showResendEmail, setShowResendEmail] = useState(false);
   const setLoading = useGlobalStore((state) => state.setLoading);
   const setUserInfo = useGlobalStore((state) => state.setUserInfo);
+
+  const handleResendConfirmationEmail = async () => {
+    if (!email) {
+      toast.error("Vui lòng nhập email");
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+
+    if (error) {
+      toast.error("Không thể gửi email xác nhận. Vui lòng thử lại");
+    } else {
+      toast.success("Đã gửi email xác nhận. Vui lòng kiểm tra hộp thư");
+      setShowResendEmail(false);
+    }
+    setLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setShowResendEmail(false);
 
-    try {
-      const token = await SERVICES.AuthService.signIn({ email, password });
-      if (token && token.accessToken.length > 0) {
-        setCookie("accessToken", token.accessToken, {
-          maxAge: 60 * 60,
-        });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-        const userInfo = await SERVICES.UserService.getUserInfo();
-        setUserInfo(userInfo);
-        if (userInfo) {
-          router.push("/dashboard");
-          toast.success("Logged successfully");
-        }
+    if (error) {
+      if (error.message === "Email not confirmed" || error.code === "email_not_confirmed") {
+        toast.error("Email chưa được xác nhận. Vui lòng kiểm tra hộp thư");
+        setShowResendEmail(true);
+      } else {
+        toast.error(error.message || "Email hoặc mật khẩu không chính xác");
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      toast.error("User email or password is incorrect");
-    } finally {
       setLoading(false);
+      return;
     }
+
+    if (!data.session || !data.user) {
+      toast.error("Đăng nhập thất bại. Vui lòng thử lại");
+      setLoading(false);
+      return;
+    }
+
+    const { session, user } = data;
+
+    setCookie("accessToken", session.access_token, {
+      maxAge: 60 * 60, // 1 giờ
+    });
+
+    setUserInfo({
+      email: user.email ?? "",
+      fullName:
+        (user.user_metadata?.fullName as string) ??
+        `${user.user_metadata?.firstName ?? ""} ${user.user_metadata?.lastName ?? ""}`.trim(),
+      phone: user.phone,
+      photoUrl: user.user_metadata?.avatar_url,
+      id: undefined,
+      createdAt: new Date(user.created_at),
+      updatedAt: new Date(user.updated_at ?? user.last_sign_in_at ?? user.created_at),
+      isDeleted: false,
+    });
+
+    router.push("/dashboard");
+    toast.success("Đăng nhập thành công");
+    setLoading(false);
   };
 
   return (
@@ -113,6 +163,20 @@ export default function SignInPage() {
           Sign in
         </button>
       </form>
+      {showResendEmail && (
+        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+          <p className="text-sm text-amber-800 mb-2">
+            Email chưa được xác nhận. Bạn có muốn gửi lại email xác nhận không?
+          </p>
+          <button
+            type="button"
+            onClick={handleResendConfirmationEmail}
+            className="text-sm text-amber-600 hover:text-amber-800 underline"
+          >
+            Gửi lại email xác nhận
+          </button>
+        </div>
+      )}
       <p className="mt-4 text-gray-600 text-sm text-center">
         Do not have an account?
         <Link

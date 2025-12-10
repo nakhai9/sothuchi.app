@@ -9,10 +9,8 @@ import {
   Eye,
   TrendingDown,
   TrendingUp,
-  WalletMinimal,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { SERVICES } from '@/services/service';
 import {
@@ -28,18 +26,12 @@ import {
   TransactionReport,
 } from '@/types/transaction';
 
-import { IconButton } from '../../shared/components/ui';
-
 export default function Dashboard() {
-  const router = useRouter();
   const [report, setReport] = useState<TransactionReport | null>(null);
   const [transactions, setTransactions] = useState<
     (TransactionModel & BaseEntity)[]
   >([]);
   const setLoading = useGlobalStore((state) => state.setLoading);
-  const handleGoToPage = (url: string) => {
-    router.push(url);
-  };
 
   const fetchTransactionReport = useCallback(async () => {
     setLoading(true);
@@ -52,9 +44,9 @@ export default function Dashboard() {
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
+    // Lấy tối đa 5 transactions có paidAt gần nhất (mới nhất)
     const transactions = await SERVICES.TransactionService.getAll({
-      page: 1,
-      limit: 10,
+      limit: 5,
     });
     if (transactions) {
       setTransactions(
@@ -77,17 +69,6 @@ export default function Dashboard() {
     fetchData();
   }, [fetchData]);
 
-  const actions = [
-    <IconButton
-      type="button"
-      key="wallets"
-      onClick={() => handleGoToPage("/accounts")}
-      icon={<WalletMinimal size={20} />}
-      size="md"
-      title="Wallets"
-    />,
-  ];
-
   const formActions = [
     <button
       key="add"
@@ -106,7 +87,6 @@ export default function Dashboard() {
     <PageLayout
       title="Dashboard"
       description="Welcome to your Dashboard – an overview of your financial activities."
-      actions={actions}
     >
       {/* Financial Overview Panels */}
       <div className="gap-4 grid grid-cols-2 mb-8">
@@ -168,7 +148,7 @@ export default function Dashboard() {
               </Link>
             </div>
             <div className="max-h-[400px] overflow-auto">
-              <TransactionItems transactions={transactions} />
+              <TransactionItems transactions={transactions} showActions={false} />
             </div>
           </div>
         </div>

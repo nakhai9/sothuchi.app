@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState } from 'react';
 
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
-import { SERVICES } from "@/services/service";
-import AuthLayout from "@/shared/components/AuthLayout";
-import { useGlobalStore } from "@/store/globalStore";
+import AuthLayout from '@/shared/components/AuthLayout';
+import { supabase } from '@/shared/lib/config/supabaseClient';
+import { useGlobalStore } from '@/store/globalStore';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -18,20 +18,30 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      await SERVICES.AuthService.signUp({
-        email,
-        firstName,
-        lastName,
-        password,
-      });
-      router.push("/auth/sign-in");
-      toast.success("Created new a user");
-    } catch (error) {
-      toast.error("Cannot create new a user");
-    } finally {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          firstName,
+          lastName,
+          fullName: `${firstName} ${lastName}`.trim(),
+        },
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+
+    if (error) {
+      toast.error(error.message || "Không thể tạo tài khoản, vui lòng thử lại");
       setLoading(false);
+      return;
     }
+
+    toast.success(
+      "Tạo tài khoản thành công! Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập"
+    );
+    router.push("/auth/sign-in");
+    setLoading(false);
   };
 
   return (

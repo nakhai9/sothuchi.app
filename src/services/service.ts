@@ -1,165 +1,276 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
 import { Utils } from '@/shared/lib/utils';
-import {
-  AccountModel,
-  AccountReport,
-} from '@/types/account';
-import {
-  BaseEntity,
-  DropdownOption,
-  ResponseBase,
-} from '@/types/base';
-import { CategoryModel } from '@/types/category';
+import { BaseEntity } from '@/types/base';
 import {
   TransactionModel,
   TransactionReport,
 } from '@/types/transaction';
-import {
-  UserInfo,
-  UserLogin,
-  UserSignUp,
-  UserToken,
-} from '@/types/user';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-import { httpService } from '../shared/lib/config/httpService';
+import { supabase } from '../shared/lib/config/supabaseClient';
 
-const API_PREFIX = "api/v1";
-
-const BASE_URLS = {
-  categories: `${API_PREFIX}/categories`,
-  transactions: `${API_PREFIX}/transactions`,
-  accounts: `${API_PREFIX}/accounts`,
-  auth: {
-    signIn: `auth/sign-in`,
-    signUp: `auth/sign-up`,
-  },
-  user: `${API_PREFIX}/users`,
-  lookup: `${API_PREFIX}/lookup`,
+/**
+ * Helper function để lấy userId từ session hiện tại
+ */
+const getCurrentUserId = async (): Promise<string> => {
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData.session?.user) {
+    throw new Error('User not authenticated');
+  }
+  return sessionData.session.user.id;
 };
 
-export const SERVICES = {
-  // Category Service
-  CategoryService: {
-    getAll: async (): Promise<CategoryModel[] | undefined> => {
-      try {
-        const { data } = await httpService.get<ResponseBase<CategoryModel[]>>(
-          BASE_URLS.categories
-        );
-        return data;
-      } catch (error) {
-        console.log(error);
+/**
+ * Transaction Service - Quản lý transactions với Supabase
+ */
+const TransactionService = {
+  /**
+   * Lấy danh sách transactions của user hiện tại
+   * @param params - Pagination params: { page?, limit? }
+   */
+  getAll: async (
+    params?: { page?: number; limit?: number }
+  ): Promise<(TransactionModel & BaseEntity)[]> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      let query = supabase
+        .from('transactions')
+        .select('*')
+        .eq('userId', userId)
+        .eq('isDeleted', false)
+        .order('paidAt', { ascending: false });
+
+      // Áp dụng pagination nếu có
+      if (params?.limit) {
+        query = query.limit(params.limit);
       }
-    },
+      if (params?.page && params?.limit) {
+        const offset = (params.page - 1) * params.limit;
+        query = query.range(offset, offset + params.limit - 1);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data) {
+        return [];
+      }
+
+      return data.map((item) => ({
+        id: item.id,
+        description: item.description,
+        amount: parseFloat(item.amount),
+        type: item.type as 'income' | 'expense',
+        paidAt: new Date(item.paidAt),
+        category: item.category,
+        createdAt: new Date(item.createdAt),
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(item.createdAt),
+        isDeleted: item.isDeleted,
+      }));
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      throw error;
+    }
   },
 
-  // Transaction Service
-  TransactionService: {
-    getAll: async (
-      params?: any
-    ): Promise<(TransactionModel & BaseEntity)[] | undefined> => {
-      try {
-        let url = `${BASE_URLS.transactions}`;
-        if (params) {
-          const queryString = new URLSearchParams(params).toString();
-          url = `${url}?${queryString}`;
+  /**
+   * Tạo một transaction mới
+   */
+  create: async (payload: TransactionModel): Promise<void> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      const { error } = await supabase.from('transactions').insert({
+        description: payload.description,
+        amount: payload.amount.toString(),
+        type: payload.type,
+        paidAt: payload.paidAt.toISOString(),
+        category: payload.category,
+        userId: userId,
+        isDeleted: false,
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Tạo nhiều transactions cùng lúc (dùng khi scan bill)
+   */
+  createMany: async (payload: TransactionModel[]): Promise<void> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      const transactionsToInsert = payload.map((item) => ({
+        description: item.description,
+        amount: item.amount.toString(),
+        type: item.type,
+        paidAt: item.paidAt.toISOString(),
+        category: item.category,
+        userId: userId,
+        isDeleted: false,
+      }));
+
+      const { error } = await supabase
+        .from('transactions')
+        .insert(transactionsToInsert);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error creating multiple transactions:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Lấy báo cáo tổng hợp (total income và total expense)
+   */
+  getReport: async (): Promise<TransactionReport> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('amount, type')
+        .eq('userId', userId)
+        .eq('isDeleted', false);
+
+      if (error) {
+        throw error;
+      }
+
+      const report: TransactionReport = {
+        totalIncome: 0,
+        totalExpense: 0,
+      };
+
+      data?.forEach((item) => {
+        const amount = parseFloat(item.amount);
+        if (item.type === 'income') {
+          report.totalIncome += amount;
+        } else if (item.type === 'expense') {
+          report.totalExpense += amount;
         }
-        const { data } = await httpService.get<
-          ResponseBase<(TransactionModel & BaseEntity)[]>
-        >(url);
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    create: async (payload: TransactionModel): Promise<void> => {
-      try {
-        await httpService.post(BASE_URLS.transactions, payload);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    createMany: async (payload: TransactionModel[]): Promise<void> => {
-      try {
-        await httpService.post(`${BASE_URLS.transactions}/many`, payload);
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    getReport: async (): Promise<TransactionReport | undefined> => {
-      try {
-        const { data } = await httpService.get<ResponseBase<TransactionReport>>(
-          `${BASE_URLS.transactions}/report`
-        );
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
+      });
+
+      return report;
+    } catch (error) {
+      console.error('Error fetching transaction report:', error);
+      throw error;
+    }
   },
 
-  // Account Service
-  AccountService: {
-    create: async (payload: AccountModel): Promise<void> => {
-      try {
-        await httpService.post(BASE_URLS.accounts, payload);
-      } catch (error) {
-        console.log(error);
+  /**
+   * Lấy chi tiết một transaction theo id
+   */
+  getById: async (id: string): Promise<TransactionModel & BaseEntity> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('id', id)
+        .eq('userId', userId)
+        .eq('isDeleted', false)
+        .single();
+
+      if (error) {
+        throw error;
       }
-    },
-    getAll: async (): Promise<(AccountModel & BaseEntity)[] | undefined> => {
-      try {
-        const { data } = await httpService.get<
-          ResponseBase<(AccountModel & BaseEntity)[]>
-        >(BASE_URLS.accounts);
-        return data;
-      } catch (error) {
-        console.log(error);
+
+      if (!data) {
+        throw new Error('Transaction not found');
       }
-    },
-    softDelete: async (id: number): Promise<void> => {
-      try {
-        await httpService.delete(`${BASE_URLS.accounts}/${id}`);
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    getReport: async (id: number): Promise<AccountReport | undefined> => {
-      try {
-        const { data } = await httpService.get<ResponseBase<AccountReport>>(
-          `${BASE_URLS.accounts}/${id}/report`
-        );
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    getAccountById: async (
-      id: number
-    ): Promise<(AccountModel & BaseEntity) | undefined> => {
-      try {
-        const { data } = await httpService.get<
-          ResponseBase<AccountModel & BaseEntity>
-        >(`${BASE_URLS.accounts}/${id}`);
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    update: async (id: number, payload: AccountModel): Promise<void> => {
-      try {
-        await httpService.put(`${BASE_URLS.accounts}/${id}`, payload);
-      } catch (error) {
-        console.log(error);
-      }
-    },
+
+      return {
+        id: data.id,
+        description: data.description,
+        amount: parseFloat(data.amount),
+        type: data.type as 'income' | 'expense',
+        paidAt: new Date(data.paidAt),
+        category: data.category,
+        createdAt: new Date(data.createdAt),
+        updatedAt: data.updatedAt ? new Date(data.updatedAt) : new Date(data.createdAt),
+        isDeleted: data.isDeleted,
+      };
+    } catch (error) {
+      console.error('Error fetching transaction:', error);
+      throw error;
+    }
   },
 
-  // AI Service
-  AIService: {
-    scanReceiptWithAI: async (files: File[]): Promise<TransactionModel[]> => {
-      const systemPrompt = `
+  /**
+   * Cập nhật một transaction
+   */
+  update: async (id: string, payload: TransactionModel): Promise<void> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      const { error } = await supabase
+        .from('transactions')
+        .update({
+          description: payload.description,
+          amount: payload.amount.toString(),
+          type: payload.type,
+          paidAt: payload.paidAt.toISOString(),
+          category: payload.category,
+        })
+        .eq('id', id)
+        .eq('userId', userId);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Xóa một transaction (soft delete)
+   */
+  delete: async (id: string): Promise<void> => {
+    try {
+      const userId = await getCurrentUserId();
+
+      const { error } = await supabase
+        .from('transactions')
+        .update({ isDeleted: true })
+        .eq('id', id)
+        .eq('userId', userId);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      throw error;
+    }
+  },
+};
+
+/**
+ * AI Service - Quét hóa đơn và trích xuất thông tin transactions
+ */
+const AIService = {
+  /**
+   * Scan receipt image và trích xuất transactions
+   */
+  scanReceiptWithAI: async (files: File[]): Promise<TransactionModel[]> => {
+    const systemPrompt = `
     You are an expert at extracting information from receipts.
 
       CATEGORIES = [
@@ -313,82 +424,99 @@ export const SERVICES = {
     IMPORTANT: Extract ONLY the information visible in the receipt. Do not make assumptions about missing data.
 `;
 
-      const genAI = new GoogleGenerativeAI(
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY ?? ""
-      );
-      const model = genAI.getGenerativeModel({
-        model: process.env.NEXT_PUBLIC_GEMINI_MODEL ?? "",
-        generationConfig: {
-          responseMimeType: "application/json",
+    const genAI = new GoogleGenerativeAI(
+      "AIzaSyAb-QCcSa6A3ZstGlAMY2VuWvf2JQdrFqQ"
+    );
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        responseMimeType: 'application/json',
+      },
+    });
+
+    const content = [
+      {
+        text: systemPrompt,
+      },
+      {
+        inlineData: {
+          data: await Utils.file.convertFileToBase64(files[0]),
+          mimeType: `${files[0].type}`,
         },
+      },
+    ];
+
+    const response = await model.generateContent(content);
+    const result = response.response.text();
+    return JSON.parse(result);
+  },
+};
+
+/**
+ * User Service - Quản lý thông tin user
+ */
+const UserService = {
+  /**
+   * Cập nhật profile của user (fullName, phone)
+   */
+  updateProfile: async (payload: {
+    fullName?: string;
+    phone?: string;
+  }): Promise<void> => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session?.user) {
+        throw new Error('User not authenticated');
+      }
+
+      const updateData: {
+        data?: Record<string, any>;
+        phone?: string;
+      } = {};
+      
+      if (payload.fullName !== undefined) {
+        updateData.data = { ...updateData.data, fullName: payload.fullName };
+      }
+      
+      if (payload.phone !== undefined) {
+        updateData.phone = payload.phone;
+      }
+
+      const { error } = await supabase.auth.updateUser(updateData);
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Đổi mật khẩu của user
+   */
+  updatePassword: async (newPassword: string): Promise<void> => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
       });
 
-      const content = [
-        {
-          text: systemPrompt,
-        },
-        {
-          inlineData: {
-            data: await Utils.file.convertFileToBase64(files[0]),
-            mimeType: `${files[0].type}`,
-          },
-        },
-      ];
-
-      const response = await model.generateContent(content);
-      const result = response.response.text();
-      return JSON.parse(result);
-    },
-  },
-
-  // Auth Service
-
-  AuthService: {
-    signIn: async (userLogin: UserLogin): Promise<UserToken> => {
-      try {
-        const { data } = await httpService.post<ResponseBase<UserToken>>(
-          BASE_URLS.auth.signIn,
-          userLogin
-        );
-        return data;
-      } catch (error) {
+      if (error) {
         throw error;
       }
-    },
-    signUp: async (userSignUp: UserSignUp): Promise<void> => {
-      try {
-        console.log(userSignUp);
-
-        await httpService.post(BASE_URLS.auth.signUp, userSignUp);
-      } catch (error) {
-        throw error;
-      }
-    },
+    } catch (error) {
+      console.error('Error updating password:', error);
+      throw error;
+    }
   },
+};
 
-  UserService: {
-    getUserInfo: async (): Promise<UserInfo> => {
-      try {
-        const { data } = await httpService.get<ResponseBase<UserInfo>>(
-          `${BASE_URLS.user}/me`
-        );
-        return data;
-      } catch (error) {
-        throw error;
-      }
-    },
-  },
-
-  LookupService: {
-    getAccounts: async (): Promise<DropdownOption[]> => {
-      try {
-        const { data } = await httpService.get<ResponseBase<DropdownOption[]>>(
-          `${BASE_URLS.lookup}/accounts`
-        );
-        return data;
-      } catch (error) {
-        throw error;
-      }
-    },
-  },
+/**
+ * Export tất cả services
+ */
+export const SERVICES = {
+  TransactionService,
+  AIService,
+  UserService,
 };

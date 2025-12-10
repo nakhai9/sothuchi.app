@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import clsx from 'clsx';
-import { ReceiptText } from 'lucide-react';
+import {
+  Eye,
+  Pencil,
+  ReceiptText,
+  Trash,
+} from 'lucide-react';
 import Image from 'next/image';
 
 import {
@@ -11,10 +16,17 @@ import {
 
 type TransactionItemsProps = {
   transactions: any;
+  showActions?: boolean;
+  onEventItem?: (event: "view" | "edit" | "delete", transaction: any) => void;
 };
 export default function TransactionItems({
   transactions,
+  showActions = true,
+  onEventItem,
 }: TransactionItemsProps) {
+
+
+
   return (
     <div className="flex flex-col gap-2">
       {transactions.length === 0 && (
@@ -60,7 +72,7 @@ export default function TransactionItems({
               <div className="text-gray-500 text-xs">{x.paidAtFormatted}</div>
             </div>
           </div>
-          <div className="flex flex-col justify-center items-center text-right">
+          <div className="flex flex-row justify-center items-center text-right gap-2">
             <p
               className={clsx(
                 "font-medium text-lg",
@@ -69,21 +81,34 @@ export default function TransactionItems({
             >
               {x.amountFormatted}
             </p>
-            {/* <div className="flex items-center gap-1">
+            {showActions && (
+              <div className="flex items-center justify-end gap-2">
               <button
                 type="button"
-                className="text-blue-500 text-sm hover:underline cursor-pointer"
+                title="View"
+                className="text-gray-700 cursor-pointer hover:text-blue-500 "
+                onClick={() => onEventItem?.("view", x)}
               >
-                Edit
+                <Eye size={16} />
               </button>
-              |
               <button
                 type="button"
-                className="text-red-500 text-sm hover:underline cursor-pointer"
+                title="Edit"
+                className="text-gray-70 cursor-pointer hover:text-amber-500 "
+                onClick={() => onEventItem?.("edit", x)}
               >
-                Delete
+                <Pencil size={16} />
               </button>
-            </div> */}
+              <button
+                type="button"
+                title="Delete"
+                className="text-gray-700 cursor-pointer hover:text-red-500 "
+                onClick={() => onEventItem?.("delete", x)}
+              >
+                <Trash size={16} />
+              </button>
+            </div>
+            )}
           </div>
         </div>
       ))}

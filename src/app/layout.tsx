@@ -1,14 +1,22 @@
 "use client";
 
-import { useGlobalStore } from "@/store/globalStore";
-import "./globals.css";
+import './globals.css';
 
-import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "react-hot-toast";
-import { getCookie } from "cookies-next";
-import { useEffect } from "react";
-import { SERVICES } from "@/services/service";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+
+import {
+  getCookie,
+  setCookie,
+} from 'cookies-next';
+import {
+  Geist,
+  Geist_Mono,
+} from 'next/font/google';
+import { useRouter } from 'next/navigation';
+import { Toaster } from 'react-hot-toast';
+
+import { supabase } from '@/shared/lib/config/supabaseClient';
+import { useGlobalStore } from '@/store/globalStore';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,19 +39,35 @@ export default function RootLayout({
   const userInfo = useGlobalStore((state) => state.userInfo);
   const setUserInfo = useGlobalStore((state) => state.setUserInfo);
 
-  const token = getCookie("accessToken");
-
   useEffect(() => {
     const fetchUserInfo = async () => {
-      if (token && !userInfo) {
-        const userInfo = await SERVICES.UserService.getUserInfo();
-        if (userInfo) {
-          setUserInfo(userInfo);
-        }
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error || !data.session || !data.session.user) {
+        router.push("/auth/sign-in");
+        return;
       }
 
-      if (!token && !userInfo) {
-        router.push("/auth/sign-in");
+      const accessToken =
+        data.session.access_token ?? getCookie("accessToken")?.toString();
+      if (accessToken) {
+        setCookie("accessToken", accessToken, { maxAge: 60 * 60 });
+      }
+
+      if (!userInfo) {
+        const user = data.session.user;
+        setUserInfo({
+          email: user.email ?? "",
+          fullName:
+            (user.user_metadata?.fullName as string) ??
+            `${user.user_metadata?.firstName ?? ""} ${user.user_metadata?.lastName ?? ""}`.trim(),
+          phone: user.phone,
+          photoUrl: user.user_metadata?.avatar_url,
+          id: undefined,
+          createdAt: new Date(user.created_at),
+          updatedAt: new Date(user.updated_at ?? user.last_sign_in_at ?? user.created_at),
+          isDeleted: false,
+        });
       }
     };
     fetchUserInfo();

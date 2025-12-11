@@ -133,7 +133,7 @@ export default function TransactionForm({
         await onSuccess?.();
         toast.success("Created successfully");
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong");
     } finally {
       setLoading(false);

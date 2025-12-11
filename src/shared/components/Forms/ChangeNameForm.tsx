@@ -67,8 +67,9 @@ export default function ChangeNameForm({
       reset();
       await onSuccess?.();
       modal?.close();
-    } catch (error: any) {
-      toast.error(error.message || "Không thể đổi tên. Vui lòng thử lại");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Không thể đổi tên. Vui lòng thử lại";
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
       setLoading(false);
@@ -119,4 +120,5 @@ export default function ChangeNameForm({
     </form>
   );
 }
+
 
